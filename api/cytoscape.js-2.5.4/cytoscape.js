@@ -9813,6 +9813,8 @@ CoseLayout.prototype.run = function() {
       }
 
       refreshRequested = false;
+
+      if( rOpts.next ){ rOpts.next(); }
     });
   };
 
@@ -10517,11 +10519,14 @@ CoseLayout.prototype.run = function() {
   });
 
   var done = function(){
-    refresh({ force: true });
-
-    // Layout has finished
-    layout.one('layoutstop', options.stop);
-    layout.trigger({ type: 'layoutstop', layout: layout });
+    refresh({ 
+      force: true,
+      next: function(){
+        // Layout has finished
+        layout.one('layoutstop', options.stop);
+        layout.trigger({ type: 'layoutstop', layout: layout });
+      }
+    });
   };
 
   return this; // chaining
