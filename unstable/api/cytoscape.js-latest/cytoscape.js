@@ -1,19 +1,24 @@
 /*!
- * This file is part of Cytoscape.js 2.5.0-unstable9.
- *
- * Cytoscape.js is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * Cytoscape.js is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License along with
- * Cytoscape.js. If not, see <http://www.gnu.org/licenses/>.
- */
+Copyright (c) 2016 The Cytoscape Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the “Software”), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.cytoscape = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
@@ -1646,7 +1651,7 @@ var elesfn = ({
                       edgeNext);
 
         return cy.collection( pathArr );
-      },
+      }
     };
 
     return res;
@@ -2049,7 +2054,7 @@ var elesfn = ({
   clearQueue: define.clearQueue(),
   delay: define.delay(),
   delayAnimation: define.delayAnimation(),
-  stop: define.stop(),
+  stop: define.stop()
 });
 
 module.exports = elesfn;
@@ -2750,7 +2755,7 @@ fn = elesfn = ({
           } else if( ppos !== undefined ){ // set whole position
             ele._private.position = {
               x: ppos.x + origin.x,
-              y: ppos.y + origin.y,
+              y: ppos.y + origin.y
             };
           }
         }
@@ -3336,8 +3341,8 @@ var Element = function(cy, params, restore){
     }
   }
 
-  if( params.css ){
-    cy.style().applyBypass( this, params.css );
+  if( params.style || params.css ){
+    cy.style().applyBypass( this, params.style || params.css );
   }
 
   if( restore === undefined || restore ){
@@ -4824,7 +4829,7 @@ var elesfn = ({
         var ele = this[0];
 
         if( ele ){
-          return ele._private.style[ name ].strValue;
+          return style.getStylePropertyValue( ele, name );
         } else { // empty collection => can't get any value
           return;
         }
@@ -5683,12 +5688,6 @@ var window = _dereq_('../window');
 var document = window ? window.document : null;
 var NullRenderer = _dereq_('../extensions/renderer/null');
 
-function ready(f) {
-  var fn = ( document && (document.readyState === 'interactive' || document.readyState === 'complete') )  ? f : ready;
-
-  setTimeout(fn, 9, f);
-}
-
 var corefn = {
   add: function(opts){
 
@@ -5781,35 +5780,26 @@ var corefn = {
       }
     }
 
-    function callback(){
-      cy.one('layoutready', function(e){
-        cy.notifications(true);
-        cy.trigger(e); // we missed this event by turning notifications off, so pass it on
+    cy.one('layoutready', function(e){
+      cy.notifications(true);
+      cy.trigger(e); // we missed this event by turning notifications off, so pass it on
 
-        cy.notify({
-          type: 'load',
-          collection: cy.elements()
-        });
-
-        cy.one('load', onload);
-        cy.trigger('load');
-      }).one('layoutstop', function(){
-        cy.one('done', ondone);
-        cy.trigger('done');
+      cy.notify({
+        type: 'load',
+        collection: cy.elements()
       });
 
-      var layoutOpts = util.extend({}, cy._private.options.layout);
-      layoutOpts.eles = cy.$();
+      cy.one('load', onload);
+      cy.trigger('load');
+    }).one('layoutstop', function(){
+      cy.one('done', ondone);
+      cy.trigger('done');
+    });
 
-      cy.layout( layoutOpts );
+    var layoutOpts = util.extend({}, cy._private.options.layout);
+    layoutOpts.eles = cy.$();
 
-    }
-
-    if( window && !( cy.renderer() instanceof NullRenderer ) ){
-      ready( callback );
-    } else {
-      callback();
-    }
+    cy.layout( layoutOpts );
 
     return this;
   }
@@ -6185,7 +6175,7 @@ var corefn = ({
       };
     }
 
-    /* Runge-Kutta spring physics function generator. Adapted from Framer.js, copyright Koen Bok. MIT License: http://en.wikipedia.org/wiki/MIT_License */
+    /*! Runge-Kutta spring physics function generator. Adapted from Framer.js, copyright Koen Bok. MIT License: http://en.wikipedia.org/wiki/MIT_License */
     /* Given a tension, friction, and duration, a simulation at 60FPS will first run without a defined duration in order to calculate the full path. A second pass
        then adjusts the time delta -- using the relation between actual time and duration -- to calculate the path for the duration-constrained animation. */
     var generateSpringRK4 = (function () {
@@ -6572,7 +6562,7 @@ var Core = function( opts ){
     wheelSensitivity: is.number(options.wheelSensitivity) && options.wheelSensitivity > 0 ? options.wheelSensitivity : 1,
     motionBlur: options.motionBlur === undefined ? true : options.motionBlur, // on by default
     motionBlurOpacity: options.motionBlurOpacity === undefined ? 0.05 : options.motionBlurOpacity,
-    pixelRatio: is.number(options.pixelRatio) && options.pixelRatio > 0 ? options.pixelRatio : (options.pixelRatio === 'auto' ? undefined : 1),
+    pixelRatio: is.number(options.pixelRatio) && options.pixelRatio > 0 ? options.pixelRatio : undefined,
     desktopTapThreshold: options.desktopTapThreshold === undefined ? 4 : options.desktopTapThreshold,
     touchTapThreshold: options.touchTapThreshold === undefined ? 8 : options.touchTapThreshold
   }, options.renderer) );
@@ -6635,6 +6625,8 @@ util.extend(corefn, {
     } else {
       this.on('ready', fn);
     }
+
+    return this;
   },
 
   initrender: function(){
@@ -6793,10 +6785,6 @@ util.extend(corefn, {
         cy.style( obj.style );
       }
 
-      if( obj.layout ){
-        cy.layout( obj.layout );
-      }
-
       if( obj.zoom != null && obj.zoom !== _p.zoom ){
         cy.zoom( obj.zoom );
       }
@@ -6850,10 +6838,9 @@ util.extend(corefn, {
       json.maxZoom = cy._private.maxZoom;
       json.panningEnabled = cy._private.panningEnabled;
       json.userPanningEnabled = cy._private.userPanningEnabled;
-      json.pan = cy._private.pan;
+      json.pan = util.copy( cy._private.pan );
       json.boxSelectionEnabled = cy._private.boxSelectionEnabled;
-      json.layout = cy._private.options.layout;
-      json.renderer = cy._private.options.renderer;
+      json.renderer = util.copy( cy._private.options.renderer );
       json.hideEdgesOnViewport = cy._private.options.hideEdgesOnViewport;
       json.hideLabelsOnViewport = cy._private.options.hideLabelsOnViewport;
       json.textureOnViewport = cy._private.options.textureOnViewport;
@@ -7786,7 +7773,7 @@ var corefn = ({
       x1: ( rb.x1 - pan.x )/zoom,
       x2: ( rb.x2 - pan.x )/zoom,
       y1: ( rb.y1 - pan.y )/zoom,
-      y2: ( rb.y2 - pan.y )/zoom,
+      y2: ( rb.y2 - pan.y )/zoom
     };
 
     b.w = b.x2 - b.x1;
@@ -8632,8 +8619,13 @@ module.exports = define;
 },{"./animation":1,"./event":42,"./is":77,"./promise":80,"./selector":81,"./util":94}],42:[function(_dereq_,module,exports){
 'use strict';
 
-// ref
-// https://github.com/jquery/jquery/blob/master/src/event.js
+/*!
+Event object based on jQuery events, MIT license
+
+https://jquery.org/license/
+https://tldrlegal.com/license/mit-license
+https://github.com/jquery/jquery/blob/master/src/event.js
+*/
 
 var Event = function( src, props ) {
   // Allow instantiation without the 'new' keyword
@@ -9831,6 +9823,8 @@ CoseLayout.prototype.run = function() {
       }
 
       refreshRequested = false;
+
+      if( rOpts.next ){ rOpts.next(); }
     });
   };
 
@@ -10535,11 +10529,14 @@ CoseLayout.prototype.run = function() {
   });
 
   var done = function(){
-    refresh({ force: true });
-
-    // Layout has finished
-    layout.one('layoutstop', options.stop);
-    layout.trigger({ type: 'layoutstop', layout: layout });
+    refresh({ 
+      force: true,
+      next: function(){
+        // Layout has finished
+        layout.one('layoutstop', options.stop);
+        layout.trigger({ type: 'layoutstop', layout: layout });
+      }
+    });
   };
 
   return this; // chaining
@@ -11616,7 +11613,7 @@ BRp.registerArrowShapes = function(){
       -0.15, -0.3,
       0, 0,
       0.15, -0.3,
-      0, -0.15,
+      0, -0.15
     ],
 
     gap: function( edge ){
@@ -11653,7 +11650,7 @@ BRp.registerArrowShapes = function(){
     spacing: function( edge ){
       return renderer.getArrowWidth(edge._private.style['width'].pfValue)
         * this.radius;
-    },
+    }
   } );
 
   defineArrowShape( 'inhibitor', {
@@ -14050,7 +14047,7 @@ BRp.load = function() {
 
   }, false);
 
-  r.registerBinding(window, 'mousemove', util.throttle( function(e) {
+  r.registerBinding(window, 'mousemove', function(e) {
     var preventDefault = false;
     var capture = r.hoverData.capture;
 
@@ -14320,7 +14317,7 @@ BRp.load = function() {
         if(e.preventDefault) e.preventDefault();
         return false;
       }
-  }, 1000/30, { trailing: true }), false);
+  }, false);
 
   r.registerBinding(window, 'mouseup', function(e) {
     var capture = r.hoverData.capture;
@@ -14595,8 +14592,6 @@ BRp.load = function() {
 
   var touchstartHandler;
   r.registerBinding(r.container, 'touchstart', touchstartHandler = function(e) {
-    e.preventDefault();
-
     r.touchData.capture = true;
     r.data.bgActivePosistion = undefined;
 
@@ -14772,6 +14767,7 @@ BRp.load = function() {
         if(
             r.touchData.singleTouchMoved === false
             && !r.pinching // if pinching, then taphold unselect shouldn't take effect
+            && !r.touchData.selecting // box selection shouldn't allow taphold through
         ){
           triggerEvents( r.touchData.start, ['taphold'], e, {
             cyPosition: { x: now[0], y: now[1] }
@@ -14788,12 +14784,10 @@ BRp.load = function() {
   }, false);
 
   var touchmoveHandler;
-  r.registerBinding(window, 'touchmove', touchmoveHandler = util.throttle(function(e) {
+  r.registerBinding(window, 'touchmove', touchmoveHandler = function(e) {
 
     var select = r.selection;
     var capture = r.touchData.capture;
-    if( capture ){ e.preventDefault(); }
-
     var cy = r.cy;
     var now = r.touchData.now; var earlier = r.touchData.earlier;
     var zoom = cy.zoom();
@@ -14801,10 +14795,9 @@ BRp.load = function() {
     if (e.touches[0]) { var pos = r.projectIntoViewport(e.touches[0].clientX, e.touches[0].clientY); now[0] = pos[0]; now[1] = pos[1]; }
     if (e.touches[1]) { var pos = r.projectIntoViewport(e.touches[1].clientX, e.touches[1].clientY); now[2] = pos[0]; now[3] = pos[1]; }
     if (e.touches[2]) { var pos = r.projectIntoViewport(e.touches[2].clientX, e.touches[2].clientY); now[4] = pos[0]; now[5] = pos[1]; }
+
     var disp = []; for (var j=0;j<now.length;j++) { disp[j] = now[j] - earlier[j]; }
-
     var startPos = r.touchData.startPosition;
-
     var dx = now[0] - startPos[0];
     var dx2 = dx * dx;
     var dy = now[1] - startPos[1];
@@ -14814,6 +14807,8 @@ BRp.load = function() {
 
     // context swipe cancelling
     if( capture && r.touchData.cxt ){
+      e.preventDefault();
+
       var f1x2 = e.touches[0].clientX - offsetLeft, f1y2 = e.touches[0].clientY - offsetTop;
       var f2x2 = e.touches[1].clientX - offsetLeft, f2y2 = e.touches[1].clientY - offsetTop;
       // var distance2 = distance( f1x2, f1y2, f2x2, f2y2 );
@@ -14888,6 +14883,8 @@ BRp.load = function() {
 
     // box selection
     } else if( capture && e.touches[2] && cy.boxSelectionEnabled() ){
+      e.preventDefault();
+
       r.data.bgActivePosistion = undefined;
 
       this.lastThreeTouch = +new Date();
@@ -14912,6 +14909,8 @@ BRp.load = function() {
 
     // pinch to zoom
     } else if ( capture && e.touches[1] && cy.zoomingEnabled() && cy.panningEnabled() && cy.userZoomingEnabled() && cy.userPanningEnabled() ) { // two fingers => pinch to zoom
+      e.preventDefault();
+
       r.data.bgActivePosistion = undefined;
       r.redrawHint('select', true);
 
@@ -15020,6 +15019,10 @@ BRp.load = function() {
       var last = r.touchData.last;
       var near = near || r.findNearestElement(now[0], now[1], true, true);
 
+      if( start != null ){
+        e.preventDefault();
+      }
+
       // dragging nodes
       if( start != null && start._private.group == 'nodes' && r.nodeIsDraggable(start) ){
 
@@ -15118,8 +15121,9 @@ BRp.load = function() {
           capture
           && ( start == null || start.isEdge() )
           && cy.panningEnabled() && cy.userPanningEnabled()
-          && rdist2 > r.touchTapThreshold2
       ){
+
+        e.preventDefault();
 
         if( r.swipePanning ){
           cy.panBy({
@@ -15134,21 +15138,21 @@ BRp.load = function() {
             x: dx * zoom,
             y: dy * zoom
           });
-        }
 
-        if( start ){
-          start.unactivate();
+          if( start ){
+            start.unactivate();
 
-          if( !r.data.bgActivePosistion ){
-            r.data.bgActivePosistion = {
-              x: now[0],
-              y: now[1]
-            };
+            if( !r.data.bgActivePosistion ){
+              r.data.bgActivePosistion = {
+                x: now[0],
+                y: now[1]
+              };
+            }
+
+            r.redrawHint('select', true);
+
+            r.touchData.start = null;
           }
-
-          r.redrawHint('select', true);
-
-          r.touchData.start = null;
         }
 
         // Re-project
@@ -15160,7 +15164,7 @@ BRp.load = function() {
     for (var j=0; j<now.length; j++) { earlier[j] = now[j]; }
     //r.redraw();
 
-  }, 1000/30, { trailing: true }), false);
+  }, false);
 
   var touchcancelHandler;
   r.registerBinding(window, 'touchcancel', touchcancelHandler = function(e) {
@@ -15181,11 +15185,12 @@ BRp.load = function() {
 
     if( capture ){
       r.touchData.capture = false;
+
+      e.preventDefault();
     } else {
       return;
     }
 
-    e.preventDefault();
     var select = r.selection;
 
     r.swipePanning = false;
@@ -15446,8 +15451,12 @@ BRp.load = function() {
       });
     };
 
+    var pointerIsMouse = function( e ){
+      return e.pointerType === 'mouse' || e.pointerType === 4;
+    };
+
     r.registerBinding(r.container, 'pointerdown', function(e){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       e.preventDefault();
 
@@ -15458,7 +15467,7 @@ BRp.load = function() {
     });
 
     r.registerBinding(r.container, 'pointerup', function(e){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       removePointer( e );
 
@@ -15467,7 +15476,7 @@ BRp.load = function() {
     });
 
     r.registerBinding(r.container, 'pointercancel', function(e){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       removePointer( e );
 
@@ -15476,7 +15485,7 @@ BRp.load = function() {
     });
 
     r.registerBinding(r.container, 'pointermove', function(e){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       e.preventDefault();
 
@@ -17898,6 +17907,7 @@ Modifications tracked on Github.
 'use strict';
 
 var util = _dereq_('../../../util');
+var is = _dereq_('../../../is');
 
 var CR = CanvasRenderer;
 var CRp = CanvasRenderer.prototype;
@@ -17928,16 +17938,19 @@ function CanvasRenderer(options) {
 
   r.data.canvasContainer = document.createElement('div');
   var containerStyle = r.data.canvasContainer.style;
-  containerStyle.position = 'absolute';
+  r.data.canvasContainer.setAttribute('style', '-webkit-tap-highlight-color: rgba(0,0,0,0);');
+  containerStyle.position = 'relative';
   containerStyle.zIndex = '0';
   containerStyle.overflow = 'hidden';
 
-  options.cy.container().appendChild( r.data.canvasContainer );
+  var container = options.cy.container();
+  container.appendChild( r.data.canvasContainer );
+  container.setAttribute('style', ( container.getAttribute('style') || '' ) + '-webkit-tap-highlight-color: rgba(0,0,0,0);');
 
   for (var i = 0; i < CRp.CANVAS_LAYERS; i++) {
     var canvas = r.data.canvases[i] = document.createElement('canvas');
     r.data.contexts[i] = canvas.getContext('2d');
-    canvas.setAttribute('style', '-ms-touch-action: none; touch-action: none;');
+    canvas.setAttribute( 'style', '-webkit-user-select: none; -moz-user-select: -moz-none; user-select: none; -webkit-tap-highlight-color: rgba(0,0,0,0); outline-style: none;' + ( is.ms() ? ' -ms-touch-action: none; touch-action: none; ' : '' ) );
     canvas.style.position = 'absolute';
     canvas.setAttribute('data-id', 'layer' + i);
     canvas.style.zIndex = String(CRp.CANVAS_LAYERS - i);
@@ -18011,7 +18024,7 @@ CRp.usePaths = function(){
 
 module.exports = CR;
 
-},{"../../../util":94,"./arrow-shapes":62,"./drawing-edges":63,"./drawing-images":64,"./drawing-label-text":65,"./drawing-nodes":66,"./drawing-redraw":67,"./drawing-shapes":68,"./export-image":69,"./node-shapes":71}],71:[function(_dereq_,module,exports){
+},{"../../../is":77,"../../../util":94,"./arrow-shapes":62,"./drawing-edges":63,"./drawing-images":64,"./drawing-label-text":65,"./drawing-nodes":66,"./drawing-redraw":67,"./drawing-shapes":68,"./export-image":69,"./node-shapes":71}],71:[function(_dereq_,module,exports){
 'use strict';
 
 var CRp = {};
@@ -18389,6 +18402,21 @@ define.eventAliasesOn( fabfn );
 module.exports = Fabric;
 
 },{"./define":41,"./is":77,"./promise":80,"./thread":92,"./util":94,"os":undefined}],75:[function(_dereq_,module,exports){
+/*!
+Ported by Xueqiao Xu <xueqiaoxu@gmail.com>;
+
+PSF LICENSE AGREEMENT FOR PYTHON 2.7.2
+
+1. This LICENSE AGREEMENT is between the Python Software Foundation (“PSF”), and the Individual or Organization (“Licensee”) accessing and otherwise using Python 2.7.2 software in source or binary form and its associated documentation.
+2. Subject to the terms and conditions of this License Agreement, PSF hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use Python 2.7.2 alone or in any derivative version, provided, however, that PSF’s License Agreement and PSF’s notice of copyright, i.e., “Copyright © 2001-2012 Python Software Foundation; All Rights Reserved” are retained in Python 2.7.2 alone or in any derivative version prepared by Licensee.
+3. In the event Licensee prepares a derivative work that is based on or incorporates Python 2.7.2 or any part thereof, and wants to make the derivative work available to others as provided herein, then Licensee hereby agrees to include in any such work a brief summary of the changes made to Python 2.7.2.
+4. PSF is making Python 2.7.2 available to Licensee on an “AS IS” basis. PSF MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, PSF MAKES NO AND DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON 2.7.2 WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+5. PSF SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON 2.7.2 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING PYTHON 2.7.2, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+6. This License Agreement will automatically terminate upon a material breach of its terms and conditions.
+7. Nothing in this License Agreement shall be deemed to create any relationship of agency, partnership, or joint venture between PSF and Licensee. This License Agreement does not grant permission to use PSF trademarks or trade name in a trademark sense to endorse or promote products or services of Licensee, or any third party.
+8. By copying, installing or otherwise using Python 2.7.2, Licensee agrees to be bound by the terms and conditions of this License Agreement.
+*/
+
 'use strict';
 /* jshint ignore:start */
 
@@ -18800,7 +18828,7 @@ var cytoscape = function( options ){ // jshint ignore:line
 };
 
 // replaced by build system
-cytoscape.version = '2.5.0-unstable9';
+cytoscape.version = '2.6.0-beta1';
 
 // try to register w/ jquery
 if( window && window.jQuery ){
@@ -18978,8 +19006,8 @@ var is = {
     return is.khtml() || is.webkit() || is.chromium();
   },
 
-  trident: function(){
-     return typeof ActiveXObject !== 'undefined' || /*@cc_on!@*/false;
+  ms: function(){
+     return navigator && navigator.userAgent.match(/msie|trident|edge/i); // probably a better way to detect this...
   },
 
   windows: function(){
@@ -19972,8 +20000,11 @@ math.getRoundRectangleRadius = function(width, height) {
 module.exports = math;
 
 },{}],80:[function(_dereq_,module,exports){
-// internal, minimal Promise impl s.t. apis can return promises in old envs
-// based on thenable (http://github.com/rse/thenable)
+/*!
+Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
+Copyright (c) 2013-2014 Ralf S. Engelschall (http://engelschall.com)
+Licensed under The MIT License (http://opensource.org/licenses/MIT)
+*/
 
 'use strict';
 
@@ -21276,6 +21307,8 @@ styfn.updateStyleHints = function(ele){
   var self = this;
   var style = _p.style;
 
+  if( ele.removed() ){ return; }
+
   // set whether has pie or not; for greater efficiency
   var hasPie = false;
   if( _p.group === 'nodes' && self._private.hasPie ){
@@ -21316,8 +21349,10 @@ styfn.updateStyleHints = function(ele){
     var cpd = style['control-point-distances'] ? style['control-point-distances'].pfValue.join('_') : undefined;
     var cpw = style['control-point-weights'].value.join('_');
     var curve = style['curve-style'].strValue;
+    var sd = style['segment-distances'] ? style['segment-distances'].pfValue.join('_') : undefined;
+    var sw = style['segment-weights'].value.join('_');
 
-    _p.boundingBoxKey += '$'+ cpss +'$'+ cpd +'$'+ cpw +'$'+ curve;
+    _p.boundingBoxKey += '$'+ cpss +'$'+ cpd +'$'+ cpw +'$'+ sd +'$'+ sw +'$'+ curve;
   }
 
   _p.styleKey = Date.now();
@@ -21752,6 +21787,10 @@ styfn.applyBypass = function( eles, name, value, updateTransitions ){
 
     } // for props
 
+    if( ret ){
+      this.updateStyleHints( ele );
+    }
+
     if( updateTransitions ){
       this.updateTransitions( ele, diffProps, isBypass );
     }
@@ -21817,6 +21856,8 @@ styfn.removeBypasses = function( eles, props, updateTransitions ){
       diffProp.next = style[ prop.name ];
     } // for props
 
+    this.updateStyleHints( ele );
+
     if( updateTransitions ){
       this.updateTransitions( ele, diffProps, isBypass );
     }
@@ -21865,21 +21906,22 @@ var styfn = {};
 
 // gets the rendered style for an element
 styfn.getRenderedStyle = function( ele ){
+  return this.getRawStyle( ele, true );
+};
+
+// gets the raw style for an element
+styfn.getRawStyle = function( ele, isRenderedVal ){
   var self = this;
   var ele = ele[0]; // insure it's an element
 
   if( ele ){
     var rstyle = {};
-    var style = ele._private.style;
-    var cy = this._private.cy;
-    var zoom = cy.zoom();
 
     for( var i = 0; i < self.properties.length; i++ ){
       var prop = self.properties[i];
-      var styleProp = style[ prop.name ];
+      var val = self.getStylePropertyValue( ele, prop.name, isRenderedVal );
 
-      if( styleProp ){
-        var val = styleProp.unitless ? styleProp.strValue : (styleProp.pfValue * zoom) + 'px';
+      if( val ){
         rstyle[ prop.name ] = val;
         rstyle[ util.dash2camel(prop.name) ] = val;
       }
@@ -21889,26 +21931,25 @@ styfn.getRenderedStyle = function( ele ){
   }
 };
 
-// gets the raw style for an element
-styfn.getRawStyle = function( ele ){
+styfn.getStylePropertyValue = function( ele, propName, isRenderedVal ){
   var self = this;
   var ele = ele[0]; // insure it's an element
 
   if( ele ){
-    var rstyle = {};
     var style = ele._private.style;
+    var prop = self.properties[ propName ];
+    var type = prop.type;
+    var styleProp = style[ prop.name ];
+    var zoom = ele.cy().zoom();
 
-    for( var i = 0; i < self.properties.length; i++ ){
-      var prop = self.properties[i];
-      var styleProp = style[ prop.name ];
+    if( styleProp ){
+      var units = styleProp.units ? type.implicitUnits || 'px' : null;
+      var val = units ? [].concat( styleProp.pfValue ).map(function( pfValue ){
+        return ( pfValue * (isRenderedVal ? zoom : 1) ) + units;
+      }).join(' ') : styleProp.strValue;
 
-      if( styleProp ){
-        rstyle[ prop.name ] = styleProp.strValue;
-        rstyle[ util.dash2camel(prop.name) ] = styleProp.strValue;
-      }
+      return val;
     }
-
-    return rstyle;
   }
 };
 
@@ -22381,7 +22422,7 @@ var parseImpl = function( name, value, propIsBypass, propIsFlat ){
     };
   }
 
-  if( type.multiple && !propIsFlat ){
+  if( type.multiple && propIsFlat !== 'multiple' ){
     var vals;
 
     if( valueIsString ){
@@ -22395,7 +22436,7 @@ var parseImpl = function( name, value, propIsBypass, propIsFlat ){
     if( type.evenMultiple && vals.length % 2 !== 0 ){ return null; }
 
     var valArr = vals.map(function( v ){
-      var p = self.parse( name, v, propIsBypass, true );
+      var p = self.parse( name, v, propIsBypass, 'multiple' );
 
       if( p.pfValue != null ){
         return p.pfValue;
@@ -22498,7 +22539,7 @@ var parseImpl = function( name, value, propIsBypass, propIsFlat ){
 
     // normalise value in pixels
     if( type.unitless || (units !== 'px' && units !== 'em') ){
-      // then pfValue does not apply
+      ret.pfValue = value;
     } else {
       ret.pfValue = ( units === 'px' || !units ? (value) : (this.getEmSizeInPixels() * value) );
     }
@@ -22633,9 +22674,11 @@ var styfn = {};
     nonNegativeInt: { number: true, min: 0, integer: true, unitless: true },
     position: { enums: ['parent', 'origin'] },
     nodeSize: { number: true, min: 0, enums: ['auto', 'label'] },
-    number: { number: true },
-    numbers: { number: true, multiple: true },
+    number: { number: true, unitless: true },
+    numbers: { number: true, unitless: true, multiple: true },
     size: { number: true, min: 0 },
+    bidirectionalSize: { number: true }, // allows negative
+    bidirectionalSizes: { number: true, multiple: true }, // allows negative
     bgSize: { number: true, min: 0, allowPercent: true },
     bgWH: { number: true, min: 0, allowPercent: true, enums: ['auto'] },
     bgPos: { number: true, allowPercent: true },
@@ -22747,15 +22790,15 @@ var styfn = {};
     { name: 'shadow-blur', type: t.size },
     { name: 'shadow-color', type: t.color },
     { name: 'shadow-opacity', type: t.zeroOneNumber },
-    { name: 'shadow-offset-x', type: t.number },
-    { name: 'shadow-offset-y', type: t.number },
+    { name: 'shadow-offset-x', type: t.bidirectionalSize },
+    { name: 'shadow-offset-y', type: t.bidirectionalSize },
 
     // label shadows
     { name: 'text-shadow-blur', type: t.size },
     { name: 'text-shadow-color', type: t.color },
     { name: 'text-shadow-opacity', type: t.zeroOneNumber },
-    { name: 'text-shadow-offset-x', type: t.number },
-    { name: 'text-shadow-offset-y', type: t.number },
+    { name: 'text-shadow-offset-x', type: t.bidirectionalSize },
+    { name: 'text-shadow-offset-y', type: t.bidirectionalSize },
 
     // transition anis
     { name: 'transition-property', type: t.propList },
@@ -22803,9 +22846,9 @@ var styfn = {};
     { name: 'curve-style', type: t.curveStyle },
     { name: 'haystack-radius', type: t.zeroOneNumber },
     { name: 'control-point-step-size', type: t.size },
-    { name: 'control-point-distances', type: t.numbers },
+    { name: 'control-point-distances', type: t.bidirectionalSizes },
     { name: 'control-point-weights', type: t.numbers },
-    { name: 'segment-distances', type: t.numbers },
+    { name: 'segment-distances', type: t.bidirectionalSizes },
     { name: 'segment-weights', type: t.numbers },
 
     // these are just for the core
@@ -22962,7 +23005,7 @@ styfn.addDefaultStylesheet = function(){
         'padding-left': 0,
         'padding-right': 0,
         'position': 'origin',
-        'compound-sizing-wrt-labels': 'include',
+        'compound-sizing-wrt-labels': 'include'
       }, {
         // node pie bg
         'pie-size': '100%'
@@ -22985,7 +23028,7 @@ styfn.addDefaultStylesheet = function(){
         'line-color': '#ddd',
         'control-point-step-size': 40,
         'control-point-weights': 0.5,
-        'segment-weights': 0.25,
+        'segment-weights': 0.5,
         'segment-distances': 20,
         'curve-style': 'bezier',
         'haystack-radius': 0.8
@@ -23314,7 +23357,7 @@ var Thread = function( opts ){
 var thdfn = Thread.prototype; // short alias
 
 var stringifyFieldVal = function( val ){
-  var valStr = is.fn( val ) ? val.toString() : 'JSON.parse("' + JSON.stringify(val) + '")';
+  var valStr = is.fn( val ) ? val.toString() : "JSON.parse('" + JSON.stringify(val) + "')";
 
   return valStr;
 };
@@ -23702,7 +23745,7 @@ util.extend(thdfn, {
 // turns a stringified function into a (re)named function
 var fnAs = function( fn, name ){
   var fnStr = fn.toString();
-  fnStr = fnStr.replace(/function\s*\S*\s*\(/, 'function ' + name + '(');
+  fnStr = fnStr.replace(/function\s*?\S*?\s*?\(/, 'function ' + name + '(');
 
   return fnStr;
 };

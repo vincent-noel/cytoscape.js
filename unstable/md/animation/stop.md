@@ -11,8 +11,8 @@ Calling `ani.stop()` makes animation frames faster by reducing the number of ani
 var j = cy.$('#j');
 var jAni = j.animation({
   style: {
-    width: 100,
-    height: 200
+    'background-color': 'red',
+    'width': 75
   },
   duration: 1000
 });

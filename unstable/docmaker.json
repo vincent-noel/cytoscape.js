@@ -1,5 +1,5 @@
 {
-  "version": "2.5.0-unstable9",
+  "version": "2.6.0-beta1",
 
   "fnArgLinks": {
     "selector": "#selectors",
@@ -41,6 +41,7 @@
         { "name": "Grid layout", "id": "f70c9e45c43f40f7dfe1" },
         { "name": "CoSE layout", "id": "7b511e1f48ffd044ad66" },
         { "name": "CoSE Bilkent layout", "id": "6c9907e7896f8ae23f9f" },
+        { "name": "CoSE Bilkent layout (compound)", "id": "59e38e9f20e25a293e44" },
         { "name": "Dagre layout", "id": "e52c2fbc0b09edd6ec46" },
         { "name": "Spread layout", "id": "0365589fdb70b58af282" },
         { "name": "Images & breadthfirst layout", "id": "aedff159b0df05ccfaa5" },
@@ -276,7 +277,7 @@
             {
               "name": "cy.promiseOn",
               "pureAliases": ["cy.pon"],
-              "descr": "Get a promise that is resolved when the first of any of the specified events is triggered on the graph.",
+              "descr": "Get a promise that is resolved with the first of any of the specified events triggered on the graph.",
               "formats": [
                 {
                   "args": [
@@ -1053,7 +1054,7 @@
             {
               "name": "eles.promiseOn",
               "pureAliases": ["eles.pon"],
-              "descr": "Get a promise that is resolved when the first of any of the specified events is triggered on any of the elements in the collection.",
+              "descr": "Get a promise that is resolved with the first of any of the specified events triggered on any of the elements in the collection.",
               "formats": [
                 {
                   "args": [
@@ -1773,6 +1774,17 @@
             },
 
             {
+              "name": "eles.classes",
+              "descr": "Replace the current list of classes on the elements with the specified list.",
+              "formats": [
+                {
+                  "args": [ { "name": "classes", "descr": "A space-separated list of class names that replaces the current class list." } ]
+                }
+              ],
+              "md": "collection/classes"
+            },
+
+            {
               "name": "eles.flashClass",
               "descr": "Add classes to the elements, and then remove the classes after a specified duration.",
               "formats": [
@@ -1799,8 +1811,8 @@
 
             {
               "name": "eles.style",
-              "pureAliases": [ "eles.css", "eles.bypass" ],
-              "descr": "Get the style of the element, or override the style of the elements.",
+              "pureAliases": [ "eles.css" ],
+              "descr": "Get the style of the element.",
               "formatsSameFn": true,
               "formats": [
                 {
@@ -1812,40 +1824,9 @@
                   "name": "ele.style",
                   "descr": "Get a particular style property value.",
                   "args": [ { "name": "name", "descr": "The name of the visual style property to get." } ]
-                },
-
-                {
-                  "name": "eles.style",
-                  "descr": "Set the specified visual style property for the elements.",
-                  "args": [
-                    { "name": "name", "descr": "The name of the property to set." },
-                    { "name": "value", "descr": "The value to set to the visual style property." }
-                  ]
-                },
-
-                {
-                  "name": "eles.style",
-                  "descr": "Set several visual style properties at once for the elements.",
-                  "args": [ { "name": "props", "descr": "An object with name-value pairs representing properties to set on the elements." } ]
                 }
               ],
               "md": "collection/style"
-            },
-
-            {
-              "name": "eles.removeStyle",
-              "pureAliases": [ "eles.removeCss", "eles.removeBypass" ],
-              "descr": "Removes overridden style of the elements.",
-              "formats": [
-                {
-                  "descr": "Removes all overridden style of the elements."
-                },
-
-                {
-                  "descr": "Removes particular overridden style properties of the elements.",
-                  "args": [ { "name": "names", "descr": "A space-separated list of property names for which overridden styles will be removed." } ]
-                }
-              ]
             },
 
             {
@@ -3233,7 +3214,7 @@
             {
               "name": "layout.promiseOn",
               "pureAliases": ["layout.pon"],
-              "descr": "Get a promise that is resolved when the first of any of the specified events is triggered on the layout.",
+              "descr": "Get a promise that is resolved with the first of any of the specified events triggered on the layout.",
               "formats": [
                 {
                   "args": [
@@ -3375,7 +3356,7 @@
             },
 
             {
-              "name": "ani.appling",
+              "name": "ani.applying",
               "descr": "Get whether the animation is currently applying."
             },
 
@@ -3387,14 +3368,14 @@
 
             {
               "name": "ani.promise",
-              "descr": "Get a promise that is fulfilled for the specified animation event.",
+              "descr": "Get a promise that is fulfilled with the specified animation event.",
               "formats": [
                 {
-                  "descr": "Get a promise that is fulfilled when the animation completes."
+                  "descr": "Get a promise that is fulfilled with the next `completed` event."
                 },
 
                 {
-                  "descr": "Get a promise that is fulfilled for the specified animation event.",
+                  "descr": "Get a promise that is fulfilled with the specified animation event.",
                   "args": [
                     { "name": "animationEvent", "descr": "A string for the event name; `completed` or `complete` for completing the animation or `frame` for the next frame of the animation." }
                   ]
