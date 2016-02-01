@@ -5620,11 +5620,7 @@ util.extend(elesfn, {
     } while( unvisited.length > 0 );
 
     return components.map(function( component ){
-      var connectedEdges = component.connectedEdges().stdFilter(function( edge ){
-        return component.anySame( edge.source() ) && component.anySame( edge.target() );
-      });
-
-      return component.union( connectedEdges );
+      return component.closedNeighborhood(); // add the edges
     });
   }
 });
@@ -18083,8 +18079,6 @@ NullRenderer.prototype = {
 module.exports = NullRenderer;
 
 },{}],74:[function(_dereq_,module,exports){
-/*! Weaver licensed under MIT (https://tldrlegal.com/license/mit-license), copyright Max Franz */
-
 'use strict';
 
 var is = _dereq_('./is');
@@ -18834,7 +18828,7 @@ var cytoscape = function( options ){ // jshint ignore:line
 };
 
 // replaced by build system
-cytoscape.version = '2.6.1';
+cytoscape.version = '2.6.0-beta1';
 
 // try to register w/ jquery
 if( window && window.jQuery ){
@@ -23327,8 +23321,6 @@ sheetfn.generateStyle = function( cy ){
 module.exports = Stylesheet;
 
 },{"./is":77,"./style":86,"./util":94}],92:[function(_dereq_,module,exports){
-/*! Weaver licensed under MIT (https://tldrlegal.com/license/mit-license), copyright Max Franz */
-
 // cross-env thread/worker
 // NB : uses (heavyweight) processes on nodejs so best not to create too many threads
 
