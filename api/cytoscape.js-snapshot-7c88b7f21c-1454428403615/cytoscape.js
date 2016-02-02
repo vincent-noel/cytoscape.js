@@ -18834,7 +18834,7 @@ var cytoscape = function( options ){ // jshint ignore:line
 };
 
 // replaced by build system
-cytoscape.version = 'snapshot-7c88b7f21c-1454429358514';
+cytoscape.version = 'snapshot-7c88b7f21c-1454428403615';
 
 // try to register w/ jquery
 if( window && window.jQuery ){

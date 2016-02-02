@@ -62,12 +62,19 @@
     name: <span class="hljs-string">'preset'</span>
   },
 
-  <span class="hljs-comment">// so we can see the ids</span>
+  <span class="hljs-comment">// so we can see the ids etc</span>
   style: [
     {
       selector: <span class="hljs-string">'node'</span>,
       style: {
         <span class="hljs-string">'content'</span>: <span class="hljs-string">'data(id)'</span>
+      }
+    },
+
+    {
+      selector: <span class="hljs-string">':parent'</span>,
+      style: {
+        <span class="hljs-string">'background-opacity'</span>: <span class="hljs-number">0.6</span>
       }
     }
   ]
