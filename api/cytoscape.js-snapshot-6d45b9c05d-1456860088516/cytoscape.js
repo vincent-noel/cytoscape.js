@@ -18862,7 +18862,7 @@ var cytoscape = function( options ){ // jshint ignore:line
 };
 
 // replaced by build system
-cytoscape.version = '2.6.5';
+cytoscape.version = 'snapshot-6d45b9c05d-1456860088516';
 
 // try to register w/ jquery
 if( window && window.jQuery ){
