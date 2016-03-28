@@ -1,5 +1,5 @@
 {
-  "version": "2.6.6",
+  "version": "2.6.7",
 
   "fnArgLinks": {
     "selector": "#selectors",
@@ -2211,12 +2211,6 @@
                 {
                   "args": [
                     { "name": "eles", "descr": "The elements to add." }
-                  ]
-                },
-
-                {
-                  "args": [
-                    { "name": "elesArray", "descr": "An array of elements to add." }
                   ]
                 },
 
