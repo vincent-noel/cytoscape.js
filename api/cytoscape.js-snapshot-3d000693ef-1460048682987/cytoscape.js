@@ -13558,13 +13558,9 @@ BRp.notify = function(params) {
   if( has.destroy ){
     r.destroy();
     return;
-  }
-
-  if( has.add || has.remove || has.load ){
+  } else if( has.add || has.remove || has.load ){
     r.updateElementsCache();
-  }
-
-  if( has.viewport ){
+  } else if( has.viewport ){
     r.redrawHint('select', true);
   }
 
@@ -14403,9 +14399,8 @@ BRp.load = function() {
       if(
         !r.dragData.didDrag // didn't move a node around
         && !r.hoverData.dragged // didn't pan
-        && !r.hoverData.selecting // not box selection
       ){
-        triggerEvents( down, ['click', 'tap', 'vclick'], e, {
+        triggerEvents( near, ['click', 'tap', 'vclick'], e, {
           cyPosition: { x: pos[0], y: pos[1] }
         } );
       }
@@ -14476,15 +14471,15 @@ BRp.load = function() {
         r.redraw();
       }
 
-      if( !select[4] ) {
+      if (!select[4]) {
+
+
         r.redrawHint('drag', true);
         r.redrawHint('eles', true);
 
-        var downWasGrabbed = down && down.grabbed();
-
         freeDraggedElements( draggedElements );
 
-        if( downWasGrabbed ){ down.trigger('free'); }
+        if( down ){ down.trigger('free'); }
       }
 
     } // else not right mouse
@@ -18853,7 +18848,7 @@ var cytoscape = function( options ){ // jshint ignore:line
 };
 
 // replaced by build system
-cytoscape.version = '2.6.8';
+cytoscape.version = 'snapshot-3d000693ef-1460048682987';
 
 // try to register w/ jquery
 if( window && window.jQuery ){
