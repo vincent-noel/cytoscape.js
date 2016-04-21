@@ -35,6 +35,29 @@ By default, a function returns a reference back to the calling object to allow f
 For functions that return a value, note that calling a singular &mdash; `ele`, `node`, or `edge` &mdash; function on a collection of more than one element will return the expected value for only the first element.
 
 
+## Object ownership
+
+When passing objects to Cytoscape.js for creating elements, animations, layouts, etc., the objects are considered owned by Cytoscape.  Objects like elements have several levels to them, and doing deep copies of those objects every time they are passed to Cytoscape creates additional expense.  When desired, the dev can copy objects manually before passing them to Cytoscape.  However, copying is not necessary for most developers most of the time.
+
+
+## Gestures
+
+Cytoscape.js supports several gestures:
+
+ * Grab and drag background to pan : touch & desktop
+ * Pinch to zoom : touch & desktop (with supported trackpad)
+ * Mouse wheel to zoom : desktop
+ * Two finger trackpad up or down to zoom : desktop
+ * Tap to select : touch & desktop
+ * Tap background to unselect : desktop
+ * Taphold background to unselect : desktop & touch
+ * Multiple selection via metakey (shift, command, control, alt) + tap : desktop
+ * Box selection : touch (three finger swipe) & desktop (metakey + mousedown then drag)
+ * Grab and drag nodes : touch & desktop
+
+All gesture actions can be controlled by the dev, toggling them on or off whenever needed.
+
+
 ## Position
 
 A node's position refers to the centre point of its bounding box.
