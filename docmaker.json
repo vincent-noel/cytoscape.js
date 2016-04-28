@@ -1,5 +1,5 @@
 {
-  "version": "2.6.9",
+  "version": "2.6.10",
 
   "fnArgLinks": {
     "selector": "#selectors",
@@ -334,13 +334,6 @@
                 }
               ],
               "md": "core/trigger"
-            },
-
-            {
-              "name": "cy.initrender",
-              "extFn": true,
-              "descr": "Get whether the initial render event has occurred (useful for extensions etc).",
-              "md": "core/initrender"
             },
 
             {
