@@ -12,7 +12,6 @@
   * jQuery
   * npm
   * Bower
-  * spm
   * Meteor/Atmosphere
  * Has a full suite of unit tests that can be run in the browser or the terminal
  * Documentation includes live code examples, doubling as an interactive requirements specification; example graphs may also be freely modified in your browser's JS console
@@ -29,6 +28,25 @@
  * Animatable graph elements and viewport
  * Fully extendable (and extensions can be autoscaffolded for you)
  * Well maintained, with only a sliver of active bug time (i.e. minimised time to bugfix)
+ * Used by
+  * [Aras](http://www.aras.com/)
+  * [BioGRID](http://thebiogrid.org/)
+  * [Cray Inc.](http://www.cray.com)
+  * [CyNetShare](http://cynetshare.ucsd.edu/)
+  * [DARPA XDATA](http://www.darpa.mil/opencatalog/xdata.html) / [Sotera Defense Solutions, Inc.](http://sotera.github.io/graphene/)
+  * [dSysMap](http://dsysmap.irbbarcelona.org)
+  * [Elsevier](https://www.elsevier.com)
+  * [Excel](https://products.office.com/en-us/excel) : [GIGRAPH](https://gigraph.io)
+  * [Ganister](http://www.ganister.eu/)
+  * [GeneMANIA](http://genemania.org)
+  * [InfoTrack](http://www.infotrack.com.au/)
+  * [Kartoteka](http://www.kartoteka.ru/vizual/)
+  * [NDex](http://home.ndexbio.org/)
+  * [Pathway Commons](http://www.pathwaycommons.org)
+  * [py2cytoscape](https://github.com/idekerlab/py2cytoscape)
+  * [Sainsbury Laboratory](http://www.tsl.ac.uk/) : [PINet](http://pinet.tsl.ac.uk/)
+  * [University of Cambridge](http://www.cam.ac.uk/) : [Intermine](http://intermine.org/)
+  * [Visual Interaction GmbH](http://www.mygaze.com/)
 
 
 
@@ -50,18 +68,23 @@ The library was developed at the [Donnelly Centre](http://thedonnellycentre.utor
 
  * npm : `npm install cytoscape`
  * bower : `bower install cytoscape`
- * spm : `spm install cytoscape`
  * jspm : `jspm install npm:cytoscape`
- * meteor : `meteor add cytoscape:cytoscape`
+ * meteor : `npm install cytoscape`
 
 
-## Cytoscape.js & Cytoscape
 
-Though Cytoscape.js shares its name with [Cytoscape](http://www.cytoscape.org/), Cytoscape.js is not exactly the same as Cytoscape desktop.  Cytoscape.js is a JavaScript library for _programmers_.  It is not an app for end-users, and developers need to write code around Cytoscape.js to build graphcentric apps.
+## Citation
 
-Cytoscape.js is a JavaScript library:  It gives you a reusable graph widget that you can integrate with the rest of your app with your own JavaScript code.  The keen members of the audience will point out that this means that Cytoscape plugins/apps &mdash; written in Java &mdash; will obviously not work in Cytoscape.js &mdash; written in Java_Script_.  However, Cytoscape.js supports its own ecosystem of extensions.
+To cite Cytoscape.js in a paper, please cite the Oxford Bioinformatics issue:
 
-We are trying to make the two projects intercompatible as possible, and we do share philosophies with Cytoscape:  Graph style and data should be separate, the library should provide core functionality with extensions adding functionality on top of the library, and so on.
+*Cytoscape.js: a graph theory library for visualisation and analysis*
+
+Franz M, Lopes CT, Huck G, Dong Y, Sumer O, Bader GD
+
+[Bioinformatics (2016) 32 (2): 309-311 first published online September 28, 2015 doi:10.1093/bioinformatics/btv557](http://bioinformatics.oxfordjournals.org/content/32/2/309) ([PDF](http://bioinformatics.oxfordjournals.org/content/32/2/309.full.pdf))
+
+[PubMed abstract](http://www.ncbi.nlm.nih.gov/pubmed/26415722)
+
 
 
 

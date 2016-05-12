@@ -1,5 +1,5 @@
 {
-  "version": "2.6.0-beta1",
+  "version": "2.7.0-beta1",
 
   "fnArgLinks": {
     "selector": "#selectors",
@@ -267,7 +267,7 @@
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "selector", "descr": "A selector to specify elements for which the handler is triggered.", "optional": true },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
@@ -298,7 +298,7 @@
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "selector", "descr": "A selector to specify elements for which the handler is triggered.", "optional": true },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
@@ -337,13 +337,6 @@
             },
 
             {
-              "name": "cy.initrender",
-              "extFn": true,
-              "descr": "Get whether the initial render event has occurred (useful for extensions etc).",
-              "md": "core/initrender"
-            },
-
-            {
               "name": "cy.onRender",
               "descr": "Run a handler function every time a frame is rendered.",
               "formats": [
@@ -371,11 +364,17 @@
 
             {
               "name": "cy.ready",
-              "descr": "Run a callback as soon as the graph becomes ready (i.e. data loaded and initial layout completed).  If the graph is already ready, then the callback is called immediately.",
+              "descr": "Run a callback as soon as the graph becomes ready (i.e. data loaded and initial layout completed).  If the graph is already ready, then the callback is called immediately.  If data is loaded synchronously and the layout used is discrete/synchronous/unanimated/unspecified, then you don't need `cy.ready()`.",
               "formats": [
                 {
                   "args": [
-                    { "name": "function()", "descr": "The callback run as soon as the graph is ready, inside which `this` refers to the core (`cy`)." }
+                    {
+                      "name": "function(event)",
+                      "descr": "The callback run as soon as the graph is ready, inside which `event.cy` refers to the core (`cy`).",
+                      "fields": [
+                        { "name": "event", "descr": "The `ready` event." }
+                      ]
+                    }
                   ]
                 }
               ]
@@ -1044,7 +1043,7 @@
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is triggered.", "optional": true },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
@@ -1075,7 +1074,7 @@
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is triggered.", "optional": true },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
@@ -1091,7 +1090,7 @@
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is triggered.", "optional": true },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
@@ -1454,14 +1453,14 @@
                 },
 
                 {
-                  "descr": "Get the value of a specified rendered posisition dimension.",
+                  "descr": "Get the value of a specified rendered position dimension.",
                   "args": [
                     { "name": "dimension", "descr": "The position dimension to get." }
                   ]
                 },
 
                 {
-                  "descr": "Set the value of a specified rendered posisition dimension.",
+                  "descr": "Set the value of a specified rendered position dimension.",
                   "args": [
                     { "name": "dimension", "descr": "The position dimension to set." },
                     { "name": "value", "descr": "The value to set to the dimension." }
@@ -1487,14 +1486,14 @@
                 },
 
                 {
-                  "descr": "Get the value of a specified relative posisition dimension.",
+                  "descr": "Get the value of a specified relative position dimension.",
                   "args": [
                     { "name": "dimension", "descr": "The position dimension to get." }
                   ]
                 },
 
                 {
-                  "descr": "Set the value of a specified relative posisition dimension.",
+                  "descr": "Set the value of a specified relative position dimension.",
                   "args": [
                     { "name": "dimension", "descr": "The position dimension to set." },
                     { "name": "value", "descr": "The value to set to the dimension." }
@@ -1545,9 +1544,10 @@
                       "name": "options",
                       "descr": "An object containing options for the function.",
                       "fields": [
-                        { "name": "includeNodes", "descr": "A boolean indicating whether to include nodes in the bounding box." },
-                        { "name": "includeEdges", "descr": "A boolean indicating whether to include edges in the bounding box." },
-                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box." }
+                        { "name": "includeNodes", "descr": "A boolean indicating whether to include nodes in the bounding box (default `true`)." },
+                        { "name": "includeEdges", "descr": "A boolean indicating whether to include edges in the bounding box (default `true`)." },
+                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box (default `true`)." },
+                        { "name": "includeShadows", "descr": "A boolean indicating whether to include shadows in the bounding box (default `true`)." }
                       ]
                     }
                   ]
@@ -1569,9 +1569,10 @@
                       "name": "options",
                       "descr": "An object containing options for the function.",
                       "fields": [
-                        { "name": "includeNodes", "descr": "A boolean indicating whether to include nodes in the bounding box." },
-                        { "name": "includeEdges", "descr": "A boolean indicating whether to include edges in the bounding box." },
-                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box." }
+                        { "name": "includeNodes", "descr": "A boolean indicating whether to include nodes in the bounding box (default `true`)." },
+                        { "name": "includeEdges", "descr": "A boolean indicating whether to include edges in the bounding box (default `true`)." },
+                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box (default `true`)." },
+                        { "name": "includeShadows", "descr": "A boolean indicating whether to include shadows in the bounding box (default `true`)." }
                       ]
                     }
                   ]
@@ -2210,12 +2211,6 @@
 
                 {
                   "args": [
-                    { "name": "elesArray", "descr": "An array of elements to add." }
-                  ]
-                },
-
-                {
-                  "args": [
                     { "name": "selector", "descr": "Elements in the graph matching this selector are added." }
                   ]
                 }
@@ -2515,7 +2510,7 @@
 
             {
               "name": "eles.components",
-              "descr": "Get the connected components in the calling collection.  An array of collections is returned, with each collection representing a component."
+              "descr": "Get the connected components, considering only the elements in the calling collection.  An array of collections is returned, with each collection representing a component."
             },
 
             {
@@ -3015,8 +3010,8 @@
             },
 
             {
-              "name": "nodes.parents",
-              "pureAliases": ["nodes.ancestors"],
+              "name": "nodes.ancestors",
+              "pureAliases": ["nodes.parents"],
               "descr": "Get all compound ancestor nodes (i.e. parents, parents' parents, etc.) of each node in the collection.",
               "formats": [
                 {
@@ -3204,7 +3199,7 @@
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
@@ -3233,7 +3228,7 @@
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
                     { "name": "data", "descr": "A plain object which is passed to the handler in the event object argument.", "optional": true },
-                    { "name": "function(evt)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "evt", "descr": "The event object." } ] }
+                    { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
               ],
