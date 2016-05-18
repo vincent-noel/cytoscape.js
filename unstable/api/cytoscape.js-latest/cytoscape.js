@@ -2,7 +2,7 @@
 
 /*!
 
-Cytoscape.js 2.7.0-beta1 (MIT licensed)
+Cytoscape.js 2.7.0-beta2 (MIT licensed)
 
 Copyright (c) The Cytoscape Consortium
 
@@ -2950,6 +2950,30 @@ var prefixedProperty = function( obj, field, prefix ){
   return util.getPrefixedProperty( obj, field, prefix );
 };
 
+var updateBoundsFromArrow = function( bounds, ele, prefix, options ){
+  var _p = ele._private;
+  var rstyle = _p.rstyle;
+  var halfArW = rstyle.arrowWidth / 2;
+  var arrowType = ele.pstyle( prefix + '-arrow-shape' ).value;
+  var x;
+  var y;
+
+  if( arrowType !== 'none' ){
+    if( prefix === 'source' ){
+      x = rstyle.srcX;
+      y = rstyle.srcY;
+    } else if( prefix === 'target' ){
+      x = rstyle.tgtX;
+      y = rstyle.tgtY;
+    } else {
+      x = rstyle.midX;
+      y = rstyle.midY;
+    }
+
+    updateBounds( bounds, x - halfArW, y - halfArW, x + halfArW, y + halfArW );
+  }
+};
+
 var updateBoundsFromLabel = function( bounds, ele, prefix, options ){
   var prefixDash;
 
@@ -3107,6 +3131,14 @@ var boundingBoxImpl = function( ele, options ){
       }
     }
 
+    var w = 0;
+    var wHalf = 0;
+
+    if( styleEnabled ){
+      w = ele.pstyle( 'width' ).pfValue;
+      wHalf = w / 2;
+    }
+
     if( isNode && options.includeNodes ){
       var pos = _p.position;
       x = pos.x;
@@ -3127,73 +3159,27 @@ var boundingBoxImpl = function( ele, options ){
       updateBounds( bounds, ex1, ey1, ex2, ey2 );
 
     } else if( isEdge && options.includeEdges ){
-      var n1 = _p.source;
-      var n1_p = n1._private;
-      var n1pos = n1_p.position;
-
-      var n2 = _p.target;
-      var n2_p = n2._private;
-      var n2pos = n2_p.position;
-
+      var rstyle = _p.rstyle || {};
 
       // handle edge dimensions (rough box estimate)
       //////////////////////////////////////////////
-
-      var rstyle = _p.rstyle || {};
-      var w = 0;
-      var wHalf = 0;
-
       if( styleEnabled ){
-        w = ele.pstyle( 'width' ).pfValue;
-        wHalf = w / 2;
+        ex1 = Math.min( rstyle.srcX, rstyle.midX, rstyle.tgtX );
+        ex2 = Math.max( rstyle.srcX, rstyle.midX, rstyle.tgtX );
+        ey1 = Math.min( rstyle.srcY, rstyle.midY, rstyle.tgtY );
+        ey2 = Math.max( rstyle.srcY, rstyle.midY, rstyle.tgtY );
+
+        // take into account edge width
+        ex1 -= wHalf;
+        ex2 += wHalf;
+        ey1 -= wHalf;
+        ey2 += wHalf;
+
+        updateBounds( bounds, ex1, ey1, ex2, ey2 );
       }
 
-      ex1 = n1pos.x;
-      ex2 = n2pos.x;
-      ey1 = n1pos.y;
-      ey2 = n2pos.y;
-
-      if( ex1 > ex2 ){
-        var temp = ex1;
-        ex1 = ex2;
-        ex2 = temp;
-      }
-
-      if( ey1 > ey2 ){
-        var temp = ey1;
-        ey1 = ey2;
-        ey2 = temp;
-      }
-
-      // take into account edge width and overlay
-      ex1 -= wHalf;
-      ex2 += wHalf;
-      ey1 -= wHalf;
-      ey2 += wHalf;
-
-      updateBounds( bounds, ex1, ey1, ex2, ey2 );
-
-      // handle points along edge (sanity check)
-      //////////////////////////////////////////
-
-      if( styleEnabled ){
-        var pts = rstyle.bezierPts || rstyle.linePts || [];
-
-        for( var j = 0; j < pts.length; j++ ){
-          var pt = pts[ j ];
-
-          ex1 = pt.x - wHalf;
-          ex2 = pt.x + wHalf;
-          ey1 = pt.y - wHalf;
-          ey2 = pt.y + wHalf;
-
-          updateBounds( bounds, ex1, ey1, ex2, ey2 );
-        }
-      }
-
-      // precise haystacks (sanity check)
-      ///////////////////////////////////
-
+      // precise haystacks
+      ////////////////////
       if( styleEnabled && ele.pstyle( 'curve-style' ).strValue === 'haystack' ){
         var hpts = rstyle.haystackPts;
 
@@ -3214,7 +3200,60 @@ var boundingBoxImpl = function( ele, options ){
           ey2 = temp;
         }
 
-        updateBounds( bounds, ex1, ey1, ex2, ey2 );
+        updateBounds( bounds, ex1 - wHalf, ey1 - wHalf, ex2 + wHalf, ey2 + wHalf );
+
+      // handle points along edge
+      ///////////////////////////
+      } else {
+        var pts = rstyle.bezierPts || rstyle.linePts || [];
+
+        for( var j = 0; j < pts.length; j++ ){
+          var pt = pts[ j ];
+
+          ex1 = pt.x - wHalf;
+          ex2 = pt.x + wHalf;
+          ey1 = pt.y - wHalf;
+          ey2 = pt.y + wHalf;
+
+          updateBounds( bounds, ex1, ey1, ex2, ey2 );
+        }
+
+        // fallback on source and target positions
+        //////////////////////////////////////////
+        if( pts.length === 0 ){
+          var n1 = _p.source;
+          var n1_p = n1._private;
+          var n1pos = n1_p.position;
+
+          var n2 = _p.target;
+          var n2_p = n2._private;
+          var n2pos = n2_p.position;
+
+          ex1 = n1pos.x;
+          ex2 = n2pos.x;
+          ey1 = n1pos.y;
+          ey2 = n2pos.y;
+
+          if( ex1 > ex2 ){
+            var temp = ex1;
+            ex1 = ex2;
+            ex2 = temp;
+          }
+
+          if( ey1 > ey2 ){
+            var temp = ey1;
+            ey1 = ey2;
+            ey2 = temp;
+          }
+
+          // take into account edge width
+          ex1 -= wHalf;
+          ex2 += wHalf;
+          ey1 -= wHalf;
+          ey2 += wHalf;
+
+          updateBounds( bounds, ex1, ey1, ex2, ey2 );
+        }
       }
 
     } // edges
@@ -3238,6 +3277,16 @@ var boundingBoxImpl = function( ele, options ){
       }
 
       updateBounds( bounds, ex1 - overlayPadding, ey1 - overlayPadding, ex2 + overlayPadding, ey2 + overlayPadding );
+    }
+
+    // handle edge arrow size
+    /////////////////////////
+
+    if( styleEnabled && options.includeEdges && isEdge ){
+      updateBoundsFromArrow( bounds, ele, 'mid-source', options );
+      updateBoundsFromArrow( bounds, ele, 'mid-target', options );
+      updateBoundsFromArrow( bounds, ele, 'source', options );
+      updateBoundsFromArrow( bounds, ele, 'target', options );
     }
 
     // handle label dimensions
@@ -11641,7 +11690,7 @@ var util = _dereq_( '../../../util' );
 
 var BRp = {};
 
-BRp.arrowShapeHeight = 0.3;
+BRp.arrowShapeWidth = 0.3;
 
 BRp.registerArrowShapes = function(){
   var arrowShapes = this.arrowShapes = {};
@@ -11839,18 +11888,6 @@ BRp.registerArrowShapes = function(){
     }
   } );
 
-  defineArrowShape( 'half-triangle-overshot', {
-    points: [
-      0, -0.25,
-      -0.5, -0.25,
-      0.5, 0.25
-    ],
-
-    leavePathOpen: true,
-
-    matchEdgeWidth: true
-  } );
-
   defineArrowShape( 'circle', {
     radius: 0.15,
 
@@ -11873,10 +11910,10 @@ BRp.registerArrowShapes = function(){
 
   defineArrowShape( 'inhibitor', {
     points: [
-      -0.25, 0,
-      -0.25, -0.1,
-      0.25, -0.1,
-      0.25, 0
+      -0.15, 0,
+      -0.15, -0.1,
+      0.15, -0.1,
+      0.15, 0
     ],
 
     spacing: function( edge ){
@@ -12054,16 +12091,7 @@ BRp.recalculateRenderedStyle = function( eles, useCache ){
       rstyle.nodeH = ele.pstyle( 'height' ).pfValue;
     } else { // edges
 
-      var srcPos = _p.source._private.position;
-      var tgtPos = _p.target._private.position;
-
       edges.push( ele );
-
-      // update rstyle positions
-      rstyle.srcX = srcPos.x;
-      rstyle.srcY = srcPos.y;
-      rstyle.tgtX = tgtPos.x;
-      rstyle.tgtY = tgtPos.y;
 
     } // if edges
 
@@ -12073,6 +12101,22 @@ BRp.recalculateRenderedStyle = function( eles, useCache ){
 
   this.recalculateEdgeProjections( edges );
   this.recalculateLabelProjections( nodes, edges );
+
+  // update edge data from projections
+  for( var i = 0; i < edges.length; i++ ){
+    var ele = edges[ i ];
+    var _p = ele._private;
+    var rstyle = _p.rstyle;
+    var rs = _p.rscratch;
+
+    // update rstyle positions
+    rstyle.srcX = rs.arrowStartX;
+    rstyle.srcY = rs.arrowStartY;
+    rstyle.tgtX = rs.arrowEndX;
+    rstyle.tgtY = rs.arrowEndY;
+    rstyle.midX = rs.midX;
+    rstyle.midY = rs.midY;
+  }
 };
 
 // Project mouse
@@ -12603,6 +12647,8 @@ BRp.projectLines = function( edge ){
       { x: hpts[2], y: hpts[3] }
     ];
   }
+
+  _p.rstyle.arrowWidth = this.getArrowWidth( edge.pstyle('width').pfValue ) * this.arrowShapeWidth;
 };
 
 BRp.projectBezier = BRp.projectLines;
@@ -13472,7 +13518,7 @@ BRp.findEdgeControlPoints = function( edges ){
       var badAEnd = !is.number( rs.arrowEndX ) || !is.number( rs.arrowEndY );
 
       var minCpADistFactor = 3;
-      var arrowW = this.getArrowWidth( edge.pstyle( 'width' ).pfValue ) * this.arrowShapeHeight;
+      var arrowW = this.getArrowWidth( edge.pstyle( 'width' ).pfValue ) * this.arrowShapeWidth;
       var minCpADist = minCpADistFactor * arrowW;
 
       if( rs.edgeType === 'bezier' ){
@@ -13587,10 +13633,7 @@ BRp.findEdgeControlPoints = function( edges ){
         rs.allpts.push( rs.endX, rs.endY );
 
         var m, mt;
-        if( rs.edgeType === 'bezier' ){
-          rs.midX = math.qbezierAt( rs.arrowStartX, rs.ctrlpts[0], rs.arrowEndX, 0.5 );
-          rs.midY = math.qbezierAt( rs.arrowStartY, rs.ctrlpts[1], rs.arrowEndY, 0.5 );
-        } else if( rs.ctrlpts.length / 2 % 2 === 0 ){
+        if( rs.ctrlpts.length / 2 % 2 === 0 ){
           m = rs.allpts.length / 2 - 1;
 
           rs.midX = rs.allpts[ m ];
@@ -13608,8 +13651,8 @@ BRp.findEdgeControlPoints = function( edges ){
         rs.allpts = [ rs.startX, rs.startY, rs.endX, rs.endY ];
 
         // default midpt for labels etc
-        rs.midX = ( rs.arrowStartX + rs.arrowEndX ) / 2;
-        rs.midY = ( rs.arrowStartY + rs.arrowEndY ) / 2;
+        rs.midX = ( rs.startX + rs.endX + rs.arrowStartX + rs.arrowEndX ) / 4;
+        rs.midY = ( rs.startY + rs.endY + rs.arrowStartY + rs.arrowEndY ) / 4;
 
       } else if( rs.edgeType === 'segments' ){
         rs.allpts = [];
@@ -16840,7 +16883,7 @@ CRp.drawCachedElement = function( context, ele, pxRatio, extent ){
   }
 };
 
-CRp.drawElements = function( context, eles, pxRatio, extent ){
+CRp.drawElements = function( context, eles ){
   var r = this;
 
   for( var i = 0; i < eles.length; i++ ){
@@ -16855,6 +16898,18 @@ CRp.drawCachedElements = function( context, eles, pxRatio, extent ){
 
   for( var i = 0; i < eles.length; i++ ){
     var ele = eles[ i ];
+
+    r.drawCachedElement( context, ele, pxRatio, extent );
+  }
+};
+
+CRp.drawCachedNodes = function( context, eles, pxRatio, extent ){
+  var r = this;
+
+  for( var i = 0; i < eles.length; i++ ){
+    var ele = eles[ i ];
+
+    if( !ele.isNode() ){ continue; }
 
     r.drawCachedElement( context, ele, pxRatio, extent );
   }
@@ -18211,7 +18266,12 @@ CRp.render = function( options ){
     var clear = motionBlur && !useBuffer ? 'motionBlur' : undefined;
 
     setContextTransform( context, clear );
-    r.drawLayeredElements( context, eles.nondrag, pixelRatio, extent );
+
+    if( hideEdges ){
+      r.drawCachedNodes( context, eles.nondrag, pixelRatio, extent );
+    } else {
+      r.drawLayeredElements( context, eles.nondrag, pixelRatio, extent );
+    }
 
     if( !drawAllLayers && !motionBlur ){
       needDraw[ r.NODE ] = false;
@@ -18223,7 +18283,12 @@ CRp.render = function( options ){
     var context = forcedContext || ( useBuffer ? r.data.bufferContexts[ r.MOTIONBLUR_BUFFER_DRAG ] : data.contexts[ r.DRAG ] );
 
     setContextTransform( context, motionBlur && !useBuffer ? 'motionBlur' : undefined );
-    r.drawCachedElements( context, eles.drag, pixelRatio, extent );
+
+    if( hideEdges ){
+      r.drawCachedNodes( context, eles.drag, pixelRatio, extent );
+    } else {
+      r.drawCachedElements( context, eles.drag, pixelRatio, extent );
+    }
 
     if( !drawAllLayers && !motionBlur ){
       needDraw[ r.DRAG ] = false;
@@ -18986,9 +19051,12 @@ CRp.createBuffer = function( w, h ){
 
 CRp.bufferCanvasImage = function( options ){
   var cy = this.cy;
-  var bb = cy.elements().boundingBox();
+  var eles = cy.elements();
+  var bb = eles.boundingBox();
   var width = options.full ? Math.ceil( bb.w ) : this.container.clientWidth;
   var height = options.full ? Math.ceil( bb.h ) : this.container.clientHeight;
+  var specdMaxDims = is.number( options.maxWidth ) || is.number( options.maxHeight );
+  var pxRatio = this.getPixelRatio();
   var scale = 1;
 
   if( options.scale !== undefined ){
@@ -18996,7 +19064,7 @@ CRp.bufferCanvasImage = function( options ){
     height *= options.scale;
 
     scale = options.scale;
-  } else if( is.number( options.maxWidth ) || is.number( options.maxHeight ) ){
+  } else if( specdMaxDims ){
     var maxScaleW = Infinity;
     var maxScaleH = Infinity;
 
@@ -19012,6 +19080,12 @@ CRp.bufferCanvasImage = function( options ){
 
     width *= scale;
     height *= scale;
+  }
+
+  if( !specdMaxDims ){
+    width *= pxRatio;
+    height *= pxRatio;
+    scale *= pxRatio;
   }
 
   var buffCanvas = document.createElement( 'canvas' );
@@ -19037,29 +19111,27 @@ CRp.bufferCanvasImage = function( options ){
 
     buffCxt.globalCompositeOperation = 'source-over';
 
-    if( options.full ){ // draw the full bounds of the graph
-      this.render( {
-        forcedContext: buffCxt,
-        drawAllLayers: true,
-        forcedZoom: scale,
-        forcedPan: { x: -bb.x1 * scale, y: -bb.y1 * scale },
-        forcedPxRatio: 1
-      } );
-    } else { // draw the current view
-      var cyPan = cy.pan();
-      var pan = {
-        x: cyPan.x * scale,
-        y: cyPan.y * scale
-      };
-      var zoom = cy.zoom() * scale;
+    var zsortedEles = this.getCachedZSortedEles();
 
-      this.render( {
-        forcedContext: buffCxt,
-        drawAllLayers: true,
-        forcedZoom: zoom,
-        forcedPan: pan,
-        forcedPxRatio: 1
-      } );
+    if( options.full ){ // draw the full bounds of the graph
+      buffCxt.translate( -bb.x1 * scale, -bb.y1 * scale );
+      buffCxt.scale( scale, scale );
+
+      this.drawElements( buffCxt, zsortedEles );
+    } else { // draw the current view
+      var pan = cy.pan();
+      
+      var translation = {
+        x: pan.x * scale,
+        y: pan.y * scale
+      };
+
+      scale *= cy.zoom();
+
+      buffCxt.translate( translation.x, translation.y );
+      buffCxt.scale( scale, scale );
+
+      this.drawElements( buffCxt, zsortedEles );
     }
   }
 
@@ -26804,7 +26876,7 @@ util.debounce = function( func, wait, options ){ // ported lodash debounce funct
 module.exports = util;
 
 },{"../is":83,"../window":107}],106:[function(_dereq_,module,exports){
-module.exports="2.7.0-beta1"
+module.exports="2.7.0-beta2"
 },{}],107:[function(_dereq_,module,exports){
 module.exports = ( typeof window === 'undefined' ? null : window );
 

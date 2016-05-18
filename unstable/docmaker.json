@@ -1,5 +1,5 @@
 {
-  "version": "2.7.0-beta1",
+  "version": "2.7.0-beta2",
 
   "fnArgLinks": {
     "selector": "#selectors",
@@ -1689,8 +1689,7 @@
                     }
                   ]
                 }
-              ],
-              "md": "collection/layout"
+              ]
             }
           ]
         },
