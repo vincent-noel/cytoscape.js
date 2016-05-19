@@ -715,7 +715,7 @@ var elesfn = ({
     }
 
     for( var s = 0; s < V.length; s++ ){
-      var sid = V[s].id()
+      var sid = V[s].id();
       var S = []; // stack
       var P = {};
       var g = {};
@@ -2988,7 +2988,6 @@ var updateBoundsFromLabel = function( bounds, ele, prefix, options ){
   var label = ele.pstyle( prefixDash + 'label' ).strValue;
 
   if( label ){
-    var fontSize = ele.pstyle( 'font-size' );
     var halign = ele.pstyle( 'text-halign' );
     var valign = ele.pstyle( 'text-valign' );
     var labelWidth = prefixedProperty( rstyle, 'labelWidth', prefix );
@@ -4060,7 +4059,6 @@ var Element = _dereq_( './element' );
 // factory for generating edge ids when no id is specified for a new element
 var idFactory = {
   generate: function( cy, element, tryThisId ){
-    var json = is.element( element ) ? element._private : element;
     var id = tryThisId != null ? tryThisId : util.uuid();
 
     while( cy.hasElementWithId( id ) ){
@@ -4550,7 +4548,6 @@ elesfn.remove = function( notifyRenderer ){
   var elesToRemove = [];
   var elesToRemoveIds = {};
   var cy = self._private.cy;
-  var cy_p = cy._private;
 
   if( notifyRenderer === undefined ){
     notifyRenderer = true;
@@ -4610,7 +4607,6 @@ elesfn.remove = function( notifyRenderer ){
     node._private.traversalCache = null;
   }
 
-  var removedParallelRefs = {};
   function removeParallelRefs( edge ){
     // removing an edge invalidates the traversal caches for the parallel edges
     var pedges = edge.parallelEdges();
@@ -5516,7 +5512,7 @@ var cache = function( fn, name ){
       if( cacheHit ){
         return cacheHit;
       } else {
-        return ch[ key ] = fn.call( eles, arg1, arg2, arg3, arg4 );
+        return ( ch[ key ] = fn.call( eles, arg1, arg2, arg3, arg4 ) );
       }
     } else {
       return fn.call( eles, arg1, arg2, arg3, arg4 );
@@ -5571,7 +5567,6 @@ var defineDagOneHop = function( params ){
 
     for( var i = 0; i < eles.length; i++ ){
       var ele = eles[ i ];
-      var eleId = ele.id();
 
       if( !ele.isNode() ){ continue; }
 
@@ -5984,9 +5979,6 @@ var is = _dereq_( '../is' );
 var util = _dereq_( '../util' );
 var Collection = _dereq_( '../collection' );
 var Element = _dereq_( '../collection/element' );
-var window = _dereq_( '../window' );
-var document = window ? window.document : null;
-var NullRenderer = _dereq_( '../extensions/renderer/null' );
 
 var corefn = {
   add: function( opts ){
@@ -6107,7 +6099,7 @@ var corefn = {
 
 module.exports = corefn;
 
-},{"../collection":26,"../collection/element":22,"../extensions/renderer/null":79,"../is":83,"../util":100,"../window":107}],34:[function(_dereq_,module,exports){
+},{"../collection":26,"../collection/element":22,"../is":83,"../util":100}],34:[function(_dereq_,module,exports){
 'use strict';
 
 var define = _dereq_( '../define' );
@@ -6265,11 +6257,11 @@ var corefn = ({
       // notify renderer
       if( ranEleAni || ranCoreAni ){
         if( eles.length > 0 ){
-          var updatedEles = eles.updateCompoundBounds().merge( eles );
+          var updatedEles = eles.updateCompoundBounds().spawnSelf().merge( eles );
 
           cy.notify({
             type: 'draw',
-            eles: eles
+            eles: updatedEles
           });
         } else {
           cy.notify({
@@ -7327,7 +7319,6 @@ module.exports = corefn;
 'use strict';
 
 var util = _dereq_( '../util' );
-var Event = _dereq_('../event');
 
 var corefn = ({
 
@@ -7374,8 +7365,8 @@ var corefn = ({
     var rOpts = util.extend( {}, options, {
       cy: cy
     } );
-    var renderer = cy._private.renderer = new RendererProto( rOpts );
 
+    cy._private.renderer = new RendererProto( rOpts );
   },
 
   onRender: function( fn ){
@@ -7392,7 +7383,7 @@ corefn.invalidateDimensions = corefn.resize;
 
 module.exports = corefn;
 
-},{"../event":45,"../util":100}],41:[function(_dereq_,module,exports){
+},{"../util":100}],41:[function(_dereq_,module,exports){
 'use strict';
 
 var is = _dereq_( '../is' );
@@ -7988,13 +7979,13 @@ var corefn = ({
     var _p = this._private;
     var container = _p.container;
 
-    return _p.sizeCache = _p.sizeCache || ( container ? {
+    return ( _p.sizeCache = _p.sizeCache || ( container ? {
       width: container.clientWidth,
       height: container.clientHeight
     } : { // fallback if no container (not 0 b/c can be used for dividing etc)
       width: 1,
       height: 1
-    } );
+    } ) );
   },
 
   width: function(){
@@ -17266,7 +17257,6 @@ function roundRect( ctx, x, y, width, height, radius ){
 // Draw text
 CRp.drawText = function( context, ele, prefix ){
   var _p = ele._private;
-  var rstyle = _p.rstyle;
   var rscratch = _p.rscratch;
   var parentOpacity = ele.effectiveOpacity();
   if( parentOpacity === 0 || ele.pstyle( 'text-opacity' ).value === 0 ){
@@ -17277,7 +17267,7 @@ CRp.drawText = function( context, ele, prefix ){
   var textY = util.getPrefixedProperty( rscratch, 'labelY', prefix );
   var text = this.getLabelText( ele, prefix );
 
-  if( text != null && text != '' && !isNaN( textX ) && !isNaN( textY ) ){
+  if( text != null && text !== '' && !isNaN( textX ) && !isNaN( textY ) ){
     this.setupTextStyle( context, ele );
 
     var pdash = prefix ? prefix + '-' : '';
@@ -17495,7 +17485,6 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
   }
 
   var usePaths = this.usePaths();
-  var canvasContext = context;
   var path;
   var pathCacheHit = false;
 
@@ -17837,7 +17826,6 @@ module.exports = CRp;
 var CRp = {};
 
 var util = _dereq_( '../../../util' );
-var math = _dereq_( '../../../math' );
 
 var motionBlurDelay = 100;
 
@@ -18449,7 +18437,7 @@ CRp.render = function( options ){
 
 module.exports = CRp;
 
-},{"../../../math":85,"../../../util":100}],71:[function(_dereq_,module,exports){
+},{"../../../util":100}],71:[function(_dereq_,module,exports){
 'use strict';
 
 var math = _dereq_( '../../../math' );
@@ -19327,7 +19315,7 @@ var useHighQualityEleTxrReqs = true; // whether to use high quality ele txr requ
 
 var useEleTxrCaching = true; // whether to use individual ele texture caching underneath this cache
 
-var log = function(){ console.log.apply( console, arguments ); };
+// var log = function(){ console.log.apply( console, arguments ); };
 
 var LayeredTextureCache = function( renderer, eleTxrCache ){
   var self = this;
@@ -24149,7 +24137,6 @@ styfn.getStylePropertyValue = function( ele, propName, isRenderedVal ){
 };
 
 styfn.getAnimationStartStyle = function( ele, aniProps ){
-  var self = this;
   var rstyle = {};
 
   for( var i = 0; i < aniProps.length; i++ ){
@@ -24432,6 +24419,7 @@ module.exports = styfn;
 
 var util = _dereq_( '../util' );
 var is = _dereq_( '../is' );
+var math = _dereq_( '../math' );
 
 var styfn = {};
 
@@ -24832,7 +24820,7 @@ styfn.parseImpl = parseImpl;
 
 module.exports = styfn;
 
-},{"../is":83,"../util":100}],95:[function(_dereq_,module,exports){
+},{"../is":83,"../math":85,"../util":100}],95:[function(_dereq_,module,exports){
 'use strict';
 
 var util = _dereq_( '../util' );
@@ -26423,7 +26411,7 @@ var util = {
                       :
              '-'            //  in other cases (if "a" is 9,14,19,24) insert "-"
           );
-      return b
+      return b;
   }
 
 };

@@ -17,6 +17,7 @@ var cy = cytoscape({
       })
     .selector('edge')
       .css({
+        'curve-style': 'bezier',
         'target-arrow-shape': 'triangle'
       })
     .selector(':selected')
