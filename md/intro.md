@@ -52,6 +52,7 @@
   * [NDex](http://www.ndexbio.org/)
   * [Pathway Commons](http://www.pathwaycommons.org)
   * [py2cytoscape](https://github.com/idekerlab/py2cytoscape)
+  * [Rezza](http://rezza.io)
   * [Sainsbury Laboratory](http://www.tsl.ac.uk/) : [PINet](http://pinet.tsl.ac.uk/)
   * [Sotera Defense Solutions, Inc.](http://www.soteradefense.com/) : [Graphene](http://sotera.github.io/graphene/)
   * [Trace](https://trace.risingstack.com/)
@@ -87,6 +88,8 @@ The library was created at the [Donnelly Centre](http://thedonnellycentre.utoron
 ## Releases
 
 - 2.7
+ - [2.7.11](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.11+is%3Aclosed)
+ - [2.7.10](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.10+is%3Aclosed)
  - [2.7.9](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.9+is%3Aclosed)
  - [2.7.8](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.8+is%3Aclosed)
  - [2.7.7](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.7+is%3Aclosed)
