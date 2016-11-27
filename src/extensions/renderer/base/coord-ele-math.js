@@ -4,6 +4,7 @@ var math = require( '../../../math' );
 var is = require( '../../../is' );
 var util = require( '../../../util' );
 var zIndexSort = require( '../../../collection/zsort' );
+var sbgn = require( '../../../sbgn' );
 
 var BRp = {};
 
@@ -264,21 +265,21 @@ BRp.findNearestElements = function( x, y, isTouch ){
     var hh = height / 2;
     var pos = _p.position;
 
-    if(
-      pos.x - hw <= x && x <= pos.x + hw // bb check x
-        &&
-      pos.y - hh <= y && y <= pos.y + hh // bb check y
-    ){
+//    if(
+//      pos.x - hw <= x && x <= pos.x + hw // bb check x
+//        &&
+//      pos.y - hh <= y && y <= pos.y + hh // bb check y
+//    ){
       var shape = r.nodeShapes[ self.getNodeShape( node ) ];
 
       if(
-        shape.checkPoint( x, y, 0, width, height, pos.x, pos.y )
+        sbgn.isNodeShapeTotallyOverriden(self, node)?shape.checkPoint( x, y, node, 0 ):shape.checkPoint(x, y, 0, width, height, pos.x, pos.y)
       ){
         addEle( node, 0 );
         return true;
       }
 
-    }
+//    }
   }
 
   function checkEdge( edge ){
@@ -538,13 +539,13 @@ BRp.getNodeShape = function( node ){
   var r = this;
   var shape = node.pstyle( 'shape' ).value;
 
-  if( node.isParent() ){
-    if( shape === 'rectangle' || shape === 'roundrectangle' ){
-      return shape;
-    } else {
-      return 'rectangle';
-    }
-  }
+//  if( node.isParent() ){
+//    if( shape === 'rectangle' || shape === 'roundrectangle' ){
+//      return shape;
+//    } else {
+//      return 'rectangle';
+//    }
+//  }
 
   if( shape === 'polygon' ){
     var points = node.pstyle( 'shape-polygon-points' ).value;
@@ -1201,6 +1202,7 @@ BRp.findEdgeControlPoints = function( edges ){
   var src, tgt, src_p, tgt_p, srcPos, tgtPos, srcW, srcH, tgtW, tgtH, srcShape, tgtShape;
   var vectorNormInverse;
   var badBezier;
+  var portsource, porttarget;
 
   // for each pair (src, tgt), create the ctrl pts
   // Nested for loop is OK; total number of iterations for both loops = edgeCount
@@ -1215,12 +1217,19 @@ BRp.findEdgeControlPoints = function( edges ){
 
     src = pairEdges[0]._private.source;
     tgt = pairEdges[0]._private.target;
+    
+    portsource = pairEdges[0].data('portsource');
+    porttarget = pairEdges[0].data('porttarget');
 
     // make sure src/tgt distinction is consistent for bundled edges
     if( !pairEdges.hasUnbundled && src.id() > tgt.id() ){
       var temp = src;
       src = tgt;
       tgt = temp;
+      
+      temp = portsource;
+      portsource = porttarget;
+      porttarget = temp;
     }
 
     src_p = src._private;
@@ -1244,26 +1253,36 @@ BRp.findEdgeControlPoints = function( edges ){
     if( (pairEdges.length > 1 && src !== tgt) || pairEdges.hasUnbundled ){
 
       // pt outside src shape to calc distance/displacement from src to tgt
-      var srcOutside = srcShape.intersectLine(
-        srcPos.x,
-        srcPos.y,
-        srcW,
-        srcH,
-        tgtPos.x,
-        tgtPos.y,
-        0
-      );
+      var srcOutside;
+      if(sbgn.isNodeShapeTotallyOverriden(this, src)) { 
+        srcOutside = srcShape.intersectLine(src, tgtPos.x, tgtPos.y, portsource);
+      }
+      else
+        srcOutside = srcShape.intersectLine(
+          srcPos.x,
+          srcPos.y,
+          srcW,
+          srcH,
+          tgtPos.x,
+          tgtPos.y,
+          0
+        );
 
       // pt outside tgt shape to calc distance/displacement from src to tgt
-      var tgtOutside = tgtShape.intersectLine(
-        tgtPos.x,
-        tgtPos.y,
-        tgtW,
-        tgtH,
-        srcPos.x,
-        srcPos.y,
-        0
-      );
+      var tgtOutside;
+      if(sbgn.isNodeShapeTotallyOverriden(this, tgt)){
+        tgtOutside = tgtShape.intersectLine(tgt, srcPos.x, srcPos.y, porttarget);
+      }
+      else
+        tgtOutside = tgtShape.intersectLine(
+            tgtPos.x,
+            tgtPos.y,
+            tgtW,
+            tgtH,
+            srcPos.x,
+            srcPos.y,
+            0
+          );
 
       var midptSrcPts = {
         x1: srcOutside[0],
@@ -1279,8 +1298,8 @@ BRp.findEdgeControlPoints = function( edges ){
         y2: tgtPos.y
       };
 
-      var dy = ( tgtOutside[1] - srcOutside[1] );
-      var dx = ( tgtOutside[0] - srcOutside[0] );
+      var dy = ( tgtPos.y - srcPos.y );
+      var dx = ( tgtPos.x - srcPos.x );
       var l = Math.sqrt( dx * dx + dy * dy );
 
       var vector = {
@@ -1300,8 +1319,8 @@ BRp.findEdgeControlPoints = function( edges ){
 
       // if node shapes overlap, then no ctrl pts to draw
       if(
-        tgtShape.checkPoint( srcOutside[0], srcOutside[1], 0, tgtW, tgtH, tgtPos.x, tgtPos.y )  &&
-        srcShape.checkPoint( tgtOutside[0], tgtOutside[1], 0, srcW, srcH, srcPos.x, srcPos.y )
+        sbgn.isNodeShapeTotallyOverriden(this, tgt)?tgtShape.checkPoint( srcOutside[0], srcOutside[1], tgt, 0 ):tgtShape.checkPoint( srcOutside[0], srcOutside[1], 0, tgtW, tgtH, tgtPos.x, tgtPos.y )  ||
+        sbgn.isNodeShapeTotallyOverriden(this, src)?srcShape.checkPoint( tgtOutside[0], tgtOutside[1], src, 0 ):srcShape.checkPoint( tgtOutside[0], tgtOutside[1], 0, srcW, srcH, srcPos.x, srcPos.y )
       ){
         vectorNormInverse = {};
         badBezier = true;
@@ -1599,15 +1618,20 @@ BRp.findEdgeControlPoints = function( edges ){
             y: rs.ctrlpts[1] + cpM.y * 2 * radius
           };
 
-          var srcCtrlPtIntn = srcShape.intersectLine(
-            srcPos.x,
-            srcPos.y,
-            srcW,
-            srcH,
-            cpProj.x,
-            cpProj.y,
-            0
-          );
+          var srcCtrlPtIntn;
+          
+          if(sbgn.isNodeShapeTotallyOverriden(this, src))
+            srcCtrlPtIntn = srcShape.intersectLine(src, cpProj.x, cpProj.y, edge._private.data.portsource);
+          else
+            srcCtrlPtIntn = srcShape.intersectLine(
+              srcPos.x,
+              srcPos.y,
+              srcW,
+              srcH,
+              cpProj.x,
+              cpProj.y,
+              0
+            );
 
           if( closeStartACp ){
             rs.ctrlpts[0] = rs.ctrlpts[0] + cpM.x * (minCpADist - startACpDist);
@@ -1638,15 +1662,19 @@ BRp.findEdgeControlPoints = function( edges ){
             y: rs.ctrlpts[1] + cpM.y * 2 * radius
           };
 
-          var tgtCtrlPtIntn = tgtShape.intersectLine(
-            tgtPos.x,
-            tgtPos.y,
-            tgtW,
-            tgtH,
-            cpProj.x,
-            cpProj.y,
-            0
-          );
+          var tgtCtrlPtIntn;
+          if(sbgn.isNodeShapeTotallyOverriden(this, tgt))
+            tgtCtrlPtIntn = tgtShape.intersectLine(tgt, cpProj.x, cpProj.y, edge._private.data.porttarget);
+          else
+            tgtCtrlPtIntn = tgtShape.intersectLine(
+              tgtPos.x,
+              tgtPos.y,
+              tgtW,
+              tgtH,
+              cpProj.x,
+              cpProj.y,
+              0
+            );
 
           if( closeEndACp ){
             rs.ctrlpts[0] = rs.ctrlpts[0] + cpM.x * (minCpADist - endACpDist);
@@ -2007,6 +2035,10 @@ BRp.findEndpoints = function( edge ){
   var multi = et !== 'bezier';
   var lines = et === 'straight' || et === 'segments';
   var segments = et === 'segments';
+  
+  var porttarget = edge._private.data.porttarget;
+  var portsource = edge._private.data.portsource;
+  
   var hasEndpts = bezier || multi || lines;
   var pointsTowards = self ? 'inside' : edge.pstyle('edge-pointing-direction').value;
   var inside = pointsTowards === 'inside';
@@ -2031,6 +2063,21 @@ BRp.findEndpoints = function( edge ){
 
     p1 = tgtArrowFromPt;
     p2 = srcArrowFromPt;
+    
+    if(!segments){
+      var portP1 = sbgn.addPortReplacementIfAny(source, portsource);
+      var portP2 = sbgn.addPortReplacementIfAny(target, porttarget);
+
+      if(portP1.x != srcPos.x || portP1.y != srcPos.y){
+        p1[0] = portP1.x;
+        p1[1] = portP1.y;
+      }
+
+      if(portP2.x != tgtPos.x || portP2.y != tgtPos.y){
+        p2[0] = portP2.x;
+        p2[1] = portP2.y;
+      }
+    }
   }
 
   p1_i = p1;
@@ -2041,15 +2088,18 @@ BRp.findEndpoints = function( edge ){
     p2_i = [ tgtPos.x, tgtPos.y ];
   }
 
-  intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
-    tgtPos.x,
-    tgtPos.y,
-    target.outerWidth(),
-    target.outerHeight(),
-    p1_i[0],
-    p1_i[1],
-    0
-  );
+  if(sbgn.isNodeShapeTotallyOverriden(this, target))
+    intersect = r.nodeShapes[this.getNodeShape(target)].intersectLine(target, p1[0], p1[1], porttarget );
+  else
+    intersect = r.nodeShapes[this.getNodeShape(target)].intersectLine(
+      tgtPos.x,
+      tgtPos.y,
+      target.outerWidth(),
+      target.outerHeight(),
+      p1[0],
+      p1[1],
+      0
+    );
 
   var arrowEnd = math.shortenIntersection(
     intersect,
@@ -2068,15 +2118,18 @@ BRp.findEndpoints = function( edge ){
   rs.arrowEndX = arrowEnd[0];
   rs.arrowEndY = arrowEnd[1];
 
-  intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
-    srcPos.x,
-    srcPos.y,
-    source.outerWidth(),
-    source.outerHeight(),
-    p2_i[0],
-    p2_i[1],
-    0
-  );
+  if(sbgn.isNodeShapeTotallyOverriden(this, source))
+    intersect = r.nodeShapes[this.getNodeShape(source)].intersectLine(source, p2[0], p2[1], portsource);
+  else
+    intersect = r.nodeShapes[this.getNodeShape(source)].intersectLine(
+      srcPos.x,
+      srcPos.y,
+      source.outerWidth(),
+      source.outerHeight(),
+      p2[0],
+      p2[1],
+      0
+    );
 
   var arrowStart = math.shortenIntersection(
     intersect,

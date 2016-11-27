@@ -1,4 +1,5 @@
 'use strict';
+var sbgn = require( '../../../sbgn' );
 
 var CRp = {};
 
@@ -117,10 +118,17 @@ CRp.drawInscribedImage = function( context, img, node ){
       if( rs.pathCache ){
         context.clip( rs.pathCache );
       } else {
-        r.nodeShapes[ r.getNodeShape( node ) ].draw(
-          context,
-          nodeX, nodeY,
-          nodeW, nodeH );
+        if(sbgn.sbgnShapes[this.getNodeShape(node)]){
+            r.nodeShapes[this.getNodeShape(node)].draw(
+                context,
+                node);
+        }
+        else{
+            r.nodeShapes[r.getNodeShape(node)].draw(
+              context,
+              nodeX, nodeY,
+              nodeW, nodeH);
+        }
 
         context.clip();
       }
@@ -135,10 +143,17 @@ CRp.drawInscribedImage = function( context, img, node ){
     var pattern = context.createPattern( img, repeat );
     context.fillStyle = pattern;
 
-    r.nodeShapes[ r.getNodeShape( node ) ].draw(
-        context,
-        nodeX, nodeY,
-        nodeW, nodeH );
+    if(sbgn.sbgnShapes[this.getNodeShape(node)]){
+        r.nodeShapes[this.getNodeShape(node)].draw(
+            context,
+            node);
+    }
+    else{
+        r.nodeShapes[r.getNodeShape(node)].draw(
+          context,
+          nodeX, nodeY,
+          nodeW, nodeH);
+    }
 
     context.translate( x, y );
     context.fill();

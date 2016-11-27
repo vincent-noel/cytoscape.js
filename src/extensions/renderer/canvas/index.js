@@ -128,7 +128,7 @@ CRp.path2dEnabled = function( on ){
 };
 
 CRp.usePaths = function(){
-  return pathsImpld && this.pathsEnabled;
+  return false;
 };
 
 [

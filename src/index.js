@@ -11,6 +11,13 @@ var Stylesheet = require( './stylesheet' );
 var Thread = require( './thread' );
 var Fabric = require( './fabric' );
 
+var baseNodeShapes = require('./extensions/renderer/base/node-shapes').nodeShapes;
+var math = require('./math');
+var styleProperties = require('./style/properties');
+var drawingShapes = require('./extensions/renderer/canvas/drawing-shapes');
+var baseArrowShapes = require('./extensions/renderer/base/arrow-shapes').arrowShapes;
+var sbgn = require( './sbgn' );
+
 var cytoscape = function( options ){ // jshint ignore:line
   // if no options specified, use default
   if( options === undefined ){
@@ -45,5 +52,13 @@ cytoscape.registerJquery = function( jQuery ){
 cytoscape.stylesheet = cytoscape.Stylesheet = Stylesheet;
 cytoscape.thread = cytoscape.Thread = Thread;
 cytoscape.fabric = cytoscape.Fabric = Fabric;
+
+// expose these api's for sbgnviz
+cytoscape.baseNodeShapes = baseNodeShapes;
+cytoscape.math = math;
+cytoscape.styleProperties = styleProperties;
+cytoscape.drawingShapes = drawingShapes;
+cytoscape.baseArrowShapes = baseArrowShapes;
+cytoscape.sbgn = sbgn;
 
 module.exports = cytoscape;
