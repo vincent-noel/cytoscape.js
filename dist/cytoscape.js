@@ -2,7 +2,7 @@
 
 /*!
 
-Cytoscape.js 2.7.11.1 (MIT licensed)
+Cytoscape.js 2.7.11.2 (MIT licensed)
 
 Copyright (c) The Cytoscape Consortium
 
@@ -27500,7 +27500,7 @@ util.debounce = function( func, wait, options ){ // ported lodash debounce funct
 module.exports = util;
 
 },{"../is":83,"../window":108}],107:[function(_dereq_,module,exports){
-module.exports="2.7.11.1"
+module.exports="2.7.11.2"
 },{}],108:[function(_dereq_,module,exports){
 module.exports = ( typeof window === 'undefined' ? null : window ); // eslint-disable-line no-undef
 
