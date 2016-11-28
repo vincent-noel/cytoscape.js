@@ -1,3 +1,7 @@
+# About
+
+This is a fork of cytoscape.js ( https://github.com/cytoscape/cytoscape.js ) library. It is forked and modified for internal usage in sbgnviz.js
+
 # Cytoscape.js
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?maxAge=1)](https://raw.githubusercontent.com/cytoscape/cytoscape.js/master/LICENSE)

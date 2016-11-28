@@ -1,39 +1,16 @@
 {
-  "name": "cytoscape",
+  "name": "cytoscape-for-sbgn",
   "version": "2.7.0-unstable",
   "license": "MIT",
   "description": "Graph theory (a.k.a. network) library for analysis and visualisation",
   "homepage": "http://js.cytoscape.org",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cytoscape/cytoscape.js.git"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js.git"
   },
   "bugs": {
-    "url": "https://github.com/cytoscape/cytoscape.js/issues"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js/issues"
   },
-  "author": {
-    "name": "Max Franz",
-    "email": "maxkfranz@gmail.com",
-    "url": "http://maxfranz.com"
-  },
-  "contributors": [
-    {
-      "name": "Christian Lopes",
-      "email": "chrtannus@gmail.com"
-    },
-    {
-      "name": "Yue Dong",
-      "email": "oryato@gmail.com"
-    },
-    {
-      "name": "Onur Sumer",
-      "email": "s.onur.sumer@gmail.com"
-    },
-    {
-      "name": "Gerardo Huck",
-      "email": "gerardohuck@gmail.com"
-    }
-  ],
   "keywords": [
     "graph",
     "graph-theory",
