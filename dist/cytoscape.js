@@ -2,7 +2,7 @@
 
 /*!
 
-Cytoscape.js 2.7.11.3 (MIT licensed)
+Cytoscape.js snapshot-02c69d0433-1480501650481 (MIT licensed)
 
 Copyright (c) The Cytoscape Consortium
 
@@ -27500,7 +27500,7 @@ util.debounce = function( func, wait, options ){ // ported lodash debounce funct
 module.exports = util;
 
 },{"../is":83,"../window":108}],107:[function(_dereq_,module,exports){
-module.exports="2.7.11.3"
+module.exports="snapshot-02c69d0433-1480501650481"
 },{}],108:[function(_dereq_,module,exports){
 module.exports = ( typeof window === 'undefined' ? null : window ); // eslint-disable-line no-undef
 
