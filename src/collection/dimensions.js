@@ -505,7 +505,7 @@ var boundingBoxImpl = function( ele, options ){
       // handle node dimensions
       /////////////////////////
       
-      var stateAndInfos = ele._private.data.sbgnstatesandinfos;
+      var stateAndInfos = ele._private.data.statesandinfos;
       var ports = ele._private.data.ports;
       var minY, maxY, minX, maxX;
       
