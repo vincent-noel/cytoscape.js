@@ -1,7 +1,7 @@
 
 /*!
 
-Cytoscape.js snapshot-02c69d0433-1480501650481 (MIT licensed)
+Cytoscape.js 2.7.11.4 (MIT licensed)
 
 Copyright (c) The Cytoscape Consortium
 
