@@ -2,7 +2,7 @@
 
 /*!
 
-Cytoscape.js 2.7.11.5 (MIT licensed)
+Cytoscape.js 2.7.11.6 (MIT licensed)
 
 Copyright (c) The Cytoscape Consortium
 
@@ -21329,7 +21329,6 @@ var Fabric = _dereq_( './fabric' );
 var baseNodeShapes = _dereq_('./extensions/renderer/base/node-shapes').nodeShapes;
 var math = _dereq_('./math');
 var styleProperties = _dereq_('./style/properties');
-var drawingShapes = _dereq_('./extensions/renderer/canvas/drawing-shapes');
 var baseArrowShapes = _dereq_('./extensions/renderer/base/arrow-shapes').arrowShapes;
 var sbgn = _dereq_( './sbgn' );
 
@@ -21372,12 +21371,11 @@ cytoscape.fabric = cytoscape.Fabric = Fabric;
 cytoscape.baseNodeShapes = baseNodeShapes;
 cytoscape.math = math;
 cytoscape.styleProperties = styleProperties;
-cytoscape.drawingShapes = drawingShapes;
 cytoscape.baseArrowShapes = baseArrowShapes;
 cytoscape.sbgn = sbgn;
 
 module.exports = cytoscape;
-},{"./-preamble":1,"./core":37,"./extension":46,"./extensions/renderer/base/arrow-shapes":57,"./extensions/renderer/base/node-shapes":62,"./extensions/renderer/canvas/drawing-shapes":71,"./fabric":80,"./is":83,"./jquery-plugin":84,"./math":85,"./sbgn":87,"./style/properties":96,"./stylesheet":98,"./thread":99,"./version.json":107,"./window":108}],83:[function(_dereq_,module,exports){
+},{"./-preamble":1,"./core":37,"./extension":46,"./extensions/renderer/base/arrow-shapes":57,"./extensions/renderer/base/node-shapes":62,"./fabric":80,"./is":83,"./jquery-plugin":84,"./math":85,"./sbgn":87,"./style/properties":96,"./stylesheet":98,"./thread":99,"./version.json":107,"./window":108}],83:[function(_dereq_,module,exports){
 'use strict';
 
 /*global HTMLElement DocumentTouch */
@@ -27500,7 +27498,7 @@ util.debounce = function( func, wait, options ){ // ported lodash debounce funct
 module.exports = util;
 
 },{"../is":83,"../window":108}],107:[function(_dereq_,module,exports){
-module.exports="2.7.11.5"
+module.exports="2.7.11.6"
 },{}],108:[function(_dereq_,module,exports){
 module.exports = ( typeof window === 'undefined' ? null : window ); // eslint-disable-line no-undef
 
