@@ -8,6 +8,12 @@ var Core = require( './core' );
 var extension = require( './extension' );
 var Stylesheet = require( './stylesheet' );
 
+var baseNodeShapes = require('./extensions/renderer/base/node-shapes').nodeShapes;
+var math = require('./math');
+var styleProperties = require('./style/properties');
+var baseArrowShapes = require('./extensions/renderer/base/arrow-shapes').arrowShapes;
+var sbgn = require( './sbgn' );
+
 var cytoscape = function( options ){ // jshint ignore:line
   // if no options specified, use default
   if( options === undefined ){
@@ -39,5 +45,12 @@ cytoscape.version = require('./version');
 
 // expose public apis (mostly for extensions)
 cytoscape.stylesheet = cytoscape.Stylesheet = Stylesheet;
+
+// expose these api's for sbgnviz
+cytoscape.baseNodeShapes = baseNodeShapes;
+cytoscape.math = math;
+cytoscape.styleProperties = styleProperties;
+cytoscape.baseArrowShapes = baseArrowShapes;
+cytoscape.sbgn = sbgn;
 
 module.exports = cytoscape;

@@ -40,9 +40,9 @@ CRp.arrowShapeImpl = function( name ){
           context.lineTo( pt.x, pt.y );
         }
 
-      if( context.closePath ){ context.closePath(); }
+//      if( context.closePath ){ context.closePath(); }
 
-      if( context.beginPath ){ context.beginPath(); }
+//      if( context.beginPath ){ context.beginPath(); }
 
         var teePts = teePoints;
         var firstTeePt = teePoints[0];

@@ -2,14 +2,16 @@
 
 var math = require( '../../../math' );
 var is = require( '../../../is' );
+var sbgn = require( '../../../sbgn' );
 var util = require( '../../../util' );
 
 var BRp = {};
+BRp.arrowShapes = {};
 
 BRp.arrowShapeWidth = 0.3;
 
 BRp.registerArrowShapes = function(){
-  var arrowShapes = this.arrowShapes = {};
+  var arrowShapes = this.arrowShapes = BRp.arrowShapes;
   var renderer = this;
 
   // Contract for arrow shapes:
@@ -318,7 +320,8 @@ BRp.registerArrowShapes = function(){
       return edge.pstyle( 'width' ).pfValue * edge.pstyle( 'arrow-scale' ).value;
     }
   } );
-
+  
+  sbgn.registerSbgnArrowShapes();
 };
 
 module.exports = BRp;

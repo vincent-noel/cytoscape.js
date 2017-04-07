@@ -4,6 +4,7 @@ var math = require( '../../../math' );
 var is = require( '../../../is' );
 var util = require( '../../../util' );
 var zIndexSort = require( '../../../collection/zsort' );
+var sbgn = require( '../../../sbgn' );
 var window = require( '../../../window' );
 
 var BRp = {};
@@ -292,21 +293,21 @@ BRp.findNearestElements = function( x, y, interactiveElementsOnly, isTouch ){
     var hh = height / 2;
     var pos = _p.position;
 
-    if(
-      pos.x - hw <= x && x <= pos.x + hw // bb check x
-        &&
-      pos.y - hh <= y && y <= pos.y + hh // bb check y
-    ){
+//    if(
+//      pos.x - hw <= x && x <= pos.x + hw // bb check x
+//        &&
+//      pos.y - hh <= y && y <= pos.y + hh // bb check y
+//    ){
       var shape = r.nodeShapes[ self.getNodeShape( node ) ];
 
       if(
-        shape.checkPoint( x, y, 0, width, height, pos.x, pos.y )
+        sbgn.isNodeShapeTotallyOverriden(self, node)?shape.checkPoint( x, y, node, 0 ):shape.checkPoint(x, y, 0, width, height, pos.x, pos.y)
       ){
         addEle( node, 0 );
         return true;
       }
 
-    }
+//    }
   }
 
   function checkEdge( edge ){
@@ -562,15 +563,15 @@ BRp.getNodeShape = function( node ){
   var r = this;
   var shape = node.pstyle( 'shape' ).value;
 
-  if( node.isParent() ){
-    if( shape === 'rectangle'
-    || shape === 'roundrectangle'
-    || shape === 'cutrectangle' ){
-      return shape;
-    } else {
-      return 'rectangle';
-    }
-  }
+//  if( node.isParent() ){
+//    if( shape === 'rectangle'
+//    || shape === 'roundrectangle'
+//    || shape === 'cutrectangle' ){
+//      return shape;
+//    } else {
+//      return 'rectangle';
+//    }
+//  }
 
   if( shape === 'polygon' ){
     var points = node.pstyle( 'shape-polygon-points' ).value;
@@ -1389,7 +1390,12 @@ BRp.findEdgeControlPoints = function( edges ){
         pairEdges.calculatedIntersection = true;
 
         // pt outside src shape to calc distance/displacement from src to tgt
-        var srcOutside = srcShape.intersectLine(
+      var srcOutside;
+      if(sbgn.isNodeShapeTotallyOverriden(this, src)) { 
+        srcOutside = srcShape.intersectLine(src, tgtPos.x, tgtPos.y);
+      }
+      else
+        srcOutside = srcShape.intersectLine(
           srcPos.x,
           srcPos.y,
           srcW,
@@ -1399,16 +1405,21 @@ BRp.findEdgeControlPoints = function( edges ){
           0
         );
 
-        // pt outside tgt shape to calc distance/displacement from src to tgt
-        var tgtOutside = tgtShape.intersectLine(
-          tgtPos.x,
-          tgtPos.y,
-          tgtW,
-          tgtH,
-          srcPos.x,
-          srcPos.y,
-          0
-        );
+      // pt outside tgt shape to calc distance/displacement from src to tgt
+      var tgtOutside;
+      if(sbgn.isNodeShapeTotallyOverriden(this, tgt)){
+        tgtOutside = tgtShape.intersectLine(tgt, srcPos.x, srcPos.y);
+      }
+      else
+        tgtOutside = tgtShape.intersectLine(
+            tgtPos.x,
+            tgtPos.y,
+            tgtW,
+            tgtH,
+            srcPos.x,
+            srcPos.y,
+            0
+          );
 
         var midptSrcPts = {
           x1: srcOutside[0],
@@ -1445,8 +1456,8 @@ BRp.findEdgeControlPoints = function( edges ){
 
         // if node shapes overlap, then no ctrl pts to draw
         if(
-          tgtShape.checkPoint( srcOutside[0], srcOutside[1], 0, tgtW, tgtH, tgtPos.x, tgtPos.y )  &&
-          srcShape.checkPoint( tgtOutside[0], tgtOutside[1], 0, srcW, srcH, srcPos.x, srcPos.y )
+          sbgn.isNodeShapeTotallyOverriden(this, tgt)?tgtShape.checkPoint( srcOutside[0], srcOutside[1], tgt, 0 ):tgtShape.checkPoint( srcOutside[0], srcOutside[1], 0, tgtW, tgtH, tgtPos.x, tgtPos.y )  ||
+          sbgn.isNodeShapeTotallyOverriden(this, src)?srcShape.checkPoint( tgtOutside[0], tgtOutside[1], src, 0 ):srcShape.checkPoint( tgtOutside[0], tgtOutside[1], 0, srcW, srcH, srcPos.x, srcPos.y )
         ){
           vectorNormInverse = {};
           badBezier = true;
@@ -1656,15 +1667,20 @@ BRp.findEdgeControlPoints = function( edges ){
             y: rs.ctrlpts[1] + cpM.y * 2 * radius
           };
 
-          var srcCtrlPtIntn = srcShape.intersectLine(
-            srcPos.x,
-            srcPos.y,
-            srcW,
-            srcH,
-            cpProj.x,
-            cpProj.y,
-            0
-          );
+          var srcCtrlPtIntn;
+          
+          if(sbgn.isNodeShapeTotallyOverriden(this, src))
+            srcCtrlPtIntn = srcShape.intersectLine(src, cpProj.x, cpProj.y);
+          else
+            srcCtrlPtIntn = srcShape.intersectLine(
+              srcPos.x,
+              srcPos.y,
+              srcW,
+              srcH,
+              cpProj.x,
+              cpProj.y,
+              0
+            );
 
           if( closeStartACp ){
             rs.ctrlpts[0] = rs.ctrlpts[0] + cpM.x * (minCpADist - startACpDist);
@@ -1695,15 +1711,19 @@ BRp.findEdgeControlPoints = function( edges ){
             y: rs.ctrlpts[1] + cpM.y * 2 * radius
           };
 
-          var tgtCtrlPtIntn = tgtShape.intersectLine(
-            tgtPos.x,
-            tgtPos.y,
-            tgtW,
-            tgtH,
-            cpProj.x,
-            cpProj.y,
-            0
-          );
+          var tgtCtrlPtIntn;
+          if(sbgn.isNodeShapeTotallyOverriden(this, tgt))
+            tgtCtrlPtIntn = tgtShape.intersectLine(tgt, cpProj.x, cpProj.y);
+          else
+            tgtCtrlPtIntn = tgtShape.intersectLine(
+              tgtPos.x,
+              tgtPos.y,
+              tgtW,
+              tgtH,
+              cpProj.x,
+              cpProj.y,
+              0
+            );
 
           if( closeEndACp ){
             rs.ctrlpts[0] = rs.ctrlpts[0] + cpM.x * (minCpADist - endACpDist);
@@ -2068,13 +2088,25 @@ BRp.manualEndptToPx = function( node, prop ){
       npos.x + Math.cos( angle ) * l,
       npos.y + Math.sin( angle ) * l
     ];
-
-    return r.nodeShapes[ this.getNodeShape( node ) ].intersectLine(
-      npos.x, npos.y,
-      w, h,
-      p[0], p[1],
-      0
-    );
+    
+    var intersection;
+    
+    if(sbgn.isNodeShapeTotallyOverriden(this, node)) {
+      intersection = r.nodeShapes[ this.getNodeShape( node ) ].intersectLine(
+        node,
+        p[0], p[1]
+      );
+    }
+    else {
+      intersection = r.nodeShapes[ this.getNodeShape( node ) ].intersectLine(
+        npos.x, npos.y,
+        w, h,
+        p[0], p[1],
+        0
+      );
+    }
+    
+    return intersection;
   }
 };
 
@@ -2144,16 +2176,26 @@ BRp.findEndpoints = function( edge ){
     } else if( tgtManEndpt.value === 'outside-to-line' ){
       p1_i = [ srcPos.x, srcPos.y ];
     }
-
-    intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
-      tgtPos.x,
-      tgtPos.y,
-      target.outerWidth(),
-      target.outerHeight(),
-      p1_i[0],
-      p1_i[1],
-      0
-    );
+    
+    if (sbgn.isNodeShapeTotallyOverriden(this, target)) {
+      intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
+        target,
+        p1_i[0],
+        p1_i[1],
+        0
+      );
+    }
+    else {
+      intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
+        tgtPos.x,
+        tgtPos.y,
+        target.outerWidth(),
+        target.outerHeight(),
+        p1_i[0],
+        p1_i[1],
+        0
+      );
+    }
   }
 
   var arrowEnd = math.shortenIntersection(
@@ -2185,16 +2227,25 @@ BRp.findEndpoints = function( edge ){
     } else if( srcManEndpt.value === 'outside-to-line' ){
       p2_i = [ tgtPos.x, tgtPos.y ];
     }
-
-    intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
-      srcPos.x,
-      srcPos.y,
-      source.outerWidth(),
-      source.outerHeight(),
-      p2_i[0],
-      p2_i[1],
-      0
-    );
+    
+    if (sbgn.isNodeShapeTotallyOverriden(this, source)) {
+      intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
+        source,
+        p2_i[0],
+        p2_i[1]
+      );
+    }
+    else {
+      intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
+        srcPos.x,
+        srcPos.y,
+        source.outerWidth(),
+        source.outerHeight(),
+        p2_i[0],
+        p2_i[1],
+        0
+      );
+    }
   }
 
   var arrowStart = math.shortenIntersection(
