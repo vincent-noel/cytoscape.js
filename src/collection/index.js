@@ -465,7 +465,7 @@ elesfn.restore = function( notifyRenderer ){
       toUpdateStyle = restored;
     }
 
-    toUpdateStyle.updateStyle( notifyRenderer );
+    toUpdateStyle.dirtyCompoundBoundsCache().updateStyle( notifyRenderer );
 
     if( notifyRenderer ){
       restored.rtrigger( 'add' );
@@ -575,8 +575,9 @@ elesfn.remove = function( notifyRenderer ){
     }
   }
 
-  // remove from core pool
-  cy.removeFromPool( elesToRemove );
+  self.dirtyCompoundBoundsCache();
+
+  cy.removeFromPool( elesToRemove ); // remove from core pool
 
   for( var i = 0; i < elesToRemove.length; i++ ){
     var ele = elesToRemove[ i ];
