@@ -595,6 +595,7 @@ var boundingBoxImpl = function( ele, options ){
       /////////////////////////
       
       var stateAndInfos = ele._private.data.statesandinfos;
+      var ports = ele._private.data.ports;
       var minY, maxY, minX, maxX;
       
       for (var i = 0; stateAndInfos && i < stateAndInfos.length; i++) {
@@ -622,6 +623,28 @@ var boundingBoxImpl = function( ele, options ){
         
         if(!maxX || stateMaxX > maxX) {
           maxX = stateMaxX;
+        }
+      }
+      
+      for( var i = 0; ports && i < ports.length; i++ ) {
+        var port = ports[i];
+        var portX = x + port.x * ele.width() / 100;
+        var portY = y + port.y * ele.height() / 100;
+        
+        if(!minY || portY < minY) {
+          minY = portY;
+        }
+        
+        if(!maxY || portY > maxY) {
+          maxY = portY;
+        }
+        
+        if(!minX || portX < minX) {
+          minX = portX;
+        }
+        
+        if(!maxX || portX > maxX) {
+          maxX = portX;
         }
       }
 
