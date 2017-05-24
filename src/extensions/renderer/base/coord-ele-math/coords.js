@@ -4,6 +4,7 @@ var window = require( '../../../../window' );
 var math = require( '../../../../math' );
 var util = require( '../../../../util' );
 var window = require( '../../../../window' );
+var sbgn = require( '../../../../sbgn' );
 
 
 var BRp = {};
@@ -111,21 +112,21 @@ BRp.findNearestElements = function( x, y, interactiveElementsOnly, isTouch ){
     var hh = height / 2;
     var pos = node.position();
 
-    if(
-      pos.x - hw <= x && x <= pos.x + hw // bb check x
-        &&
-      pos.y - hh <= y && y <= pos.y + hh // bb check y
-    ){
+//    if(
+//      pos.x - hw <= x && x <= pos.x + hw // bb check x
+//        &&
+//      pos.y - hh <= y && y <= pos.y + hh // bb check y
+//    ){
       var shape = r.nodeShapes[ self.getNodeShape( node ) ];
 
       if(
-        shape.checkPoint( x, y, 0, width, height, pos.x, pos.y )
+        sbgn.isNodeShapeTotallyOverriden(self, node)?shape.checkPoint( x, y, node, 0 ):shape.checkPoint(x, y, 0, width, height, pos.x, pos.y)
       ){
         addEle( node, 0 );
         return true;
       }
 
-    }
+//    }
   }
 
   function checkEdge( edge ){

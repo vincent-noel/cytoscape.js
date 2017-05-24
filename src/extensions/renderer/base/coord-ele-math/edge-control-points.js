@@ -2,6 +2,7 @@
 
 var math = require( '../../../../math' );
 var is = require( '../../../../is' );
+var sbgn = require( '../../../../sbgn' );
 
 var BRp = {};
 
@@ -249,26 +250,36 @@ BRp.findEdgeControlPoints = function( edges ){
         pairEdges.calculatedIntersection = true;
 
         // pt outside src shape to calc distance/displacement from src to tgt
-        var srcOutside = srcShape.intersectLine(
-          srcPos.x,
-          srcPos.y,
-          srcW,
-          srcH,
-          tgtPos.x,
-          tgtPos.y,
-          0
-        );
+        var srcOutside;
+        if(sbgn.isNodeShapeTotallyOverriden(this, src)) { 
+          srcOutside = srcShape.intersectLine(src, tgtPos.x, tgtPos.y);
+        }
+        else
+          srcOutside = srcShape.intersectLine(
+            srcPos.x,
+            srcPos.y,
+            srcW,
+            srcH,
+            tgtPos.x,
+            tgtPos.y,
+            0
+          );
 
         // pt outside tgt shape to calc distance/displacement from src to tgt
-        var tgtOutside = tgtShape.intersectLine(
-          tgtPos.x,
-          tgtPos.y,
-          tgtW,
-          tgtH,
-          srcPos.x,
-          srcPos.y,
-          0
-        );
+        var tgtOutside;
+        if(sbgn.isNodeShapeTotallyOverriden(this, tgt)){
+          tgtOutside = tgtShape.intersectLine(tgt, srcPos.x, srcPos.y);
+        }
+        else
+          tgtOutside = tgtShape.intersectLine(
+              tgtPos.x,
+              tgtPos.y,
+              tgtW,
+              tgtH,
+              srcPos.x,
+              srcPos.y,
+              0
+            );
 
         var midptSrcPts = {
           x1: srcOutside[0],
@@ -305,8 +316,8 @@ BRp.findEdgeControlPoints = function( edges ){
 
         // if node shapes overlap, then no ctrl pts to draw
         if(
-          tgtShape.checkPoint( srcOutside[0], srcOutside[1], 0, tgtW, tgtH, tgtPos.x, tgtPos.y )  &&
-          srcShape.checkPoint( tgtOutside[0], tgtOutside[1], 0, srcW, srcH, srcPos.x, srcPos.y )
+          sbgn.isNodeShapeTotallyOverriden(this, tgt)?tgtShape.checkPoint( srcOutside[0], srcOutside[1], tgt, 0 ):tgtShape.checkPoint( srcOutside[0], srcOutside[1], 0, tgtW, tgtH, tgtPos.x, tgtPos.y )  ||
+          sbgn.isNodeShapeTotallyOverriden(this, src)?srcShape.checkPoint( tgtOutside[0], tgtOutside[1], src, 0 ):srcShape.checkPoint( tgtOutside[0], tgtOutside[1], 0, srcW, srcH, srcPos.x, srcPos.y )
         ){
           vectorNormInverse = {};
           badBezier = true;
@@ -516,15 +527,20 @@ BRp.findEdgeControlPoints = function( edges ){
             y: rs.ctrlpts[1] + cpM.y * 2 * radius
           };
 
-          var srcCtrlPtIntn = srcShape.intersectLine(
-            srcPos.x,
-            srcPos.y,
-            srcW,
-            srcH,
-            cpProj.x,
-            cpProj.y,
-            0
-          );
+          var srcCtrlPtIntn;
+          
+          if(sbgn.isNodeShapeTotallyOverriden(this, src))
+            srcCtrlPtIntn = srcShape.intersectLine(src, cpProj.x, cpProj.y);
+          else
+            srcCtrlPtIntn = srcShape.intersectLine(
+              srcPos.x,
+              srcPos.y,
+              srcW,
+              srcH,
+              cpProj.x,
+              cpProj.y,
+              0
+            );
 
           if( closeStartACp ){
             rs.ctrlpts[0] = rs.ctrlpts[0] + cpM.x * (minCpADist - startACpDist);
@@ -555,15 +571,19 @@ BRp.findEdgeControlPoints = function( edges ){
             y: rs.ctrlpts[1] + cpM.y * 2 * radius
           };
 
-          var tgtCtrlPtIntn = tgtShape.intersectLine(
-            tgtPos.x,
-            tgtPos.y,
-            tgtW,
-            tgtH,
-            cpProj.x,
-            cpProj.y,
-            0
-          );
+          var tgtCtrlPtIntn;
+          if(sbgn.isNodeShapeTotallyOverriden(this, tgt))
+            tgtCtrlPtIntn = tgtShape.intersectLine(tgt, cpProj.x, cpProj.y);
+          else
+            tgtCtrlPtIntn = tgtShape.intersectLine(
+              tgtPos.x,
+              tgtPos.y,
+              tgtW,
+              tgtH,
+              cpProj.x,
+              cpProj.y,
+              0
+            );
 
           if( closeEndACp ){
             rs.ctrlpts[0] = rs.ctrlpts[0] + cpM.x * (minCpADist - endACpDist);

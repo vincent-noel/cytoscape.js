@@ -6,15 +6,15 @@ BRp.getNodeShape = function( node ){
   var r = this;
   var shape = node.pstyle( 'shape' ).value;
 
-  if( node.isParent() ){
-    if( shape === 'rectangle'
-    || shape === 'roundrectangle'
-    || shape === 'cutrectangle' ){
-      return shape;
-    } else {
-      return 'rectangle';
-    }
-  }
+//  if( node.isParent() ){
+//    if( shape === 'rectangle'
+//    || shape === 'roundrectangle'
+//    || shape === 'cutrectangle' ){
+//      return shape;
+//    } else {
+//      return 'rectangle';
+//    }
+//  }
 
   if( shape === 'polygon' ){
     var points = node.pstyle( 'shape-polygon-points' ).value;

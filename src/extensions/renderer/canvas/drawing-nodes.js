@@ -1,6 +1,7 @@
 'use strict';
 
 var is = require( '../../../is' );
+var sbgn = require( '../../../sbgn' );
 
 var CRp = {};
 
@@ -125,12 +126,19 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
       };
     }
 
-    r.nodeShapes[ this.getNodeShape( node ) ].draw(
+    if(sbgn.sbgnShapes[this.getNodeShape(node)]){
+        r.nodeShapes[this.getNodeShape(node)].draw(
+            ( path || context ),
+            node);
+    }
+    else{
+        r.nodeShapes[r.getNodeShape(node)].draw(
           ( path || context ),
           npos.x,
           npos.y,
           nodeWidth,
-          nodeHeight );
+          nodeHeight);
+    }
   }
 
   if( usePaths ){
@@ -170,12 +178,19 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
     if( darkness !== 0 || borderWidth !== 0 ){
 
       if( !usePaths ){
-        r.nodeShapes[ this.getNodeShape( node ) ].draw(
-            context,
-            pos.x,
-            pos.y,
-            nodeWidth,
-            nodeHeight );
+        if(sbgn.sbgnShapes[this.getNodeShape(node)]){
+            r.nodeShapes[this.getNodeShape(node)].draw(
+                context,
+                node);
+        }
+        else{
+            r.nodeShapes[r.getNodeShape(node)].draw(
+              context,
+              pos.x,
+              pos.y,
+              nodeWidth,
+              nodeHeight);
+        }
       }
     }
   }
