@@ -2,8 +2,10 @@
 
 var math = require('../../../math');
 var util = require('../../../util');
+var sbgn = require( '../../../sbgn' );
 
 var BRp = {};
+BRp.nodeShapes = {};
 
 BRp.generatePolygon = function( name, points ){
   return ( this.nodeShapes[ name ] = {
@@ -225,7 +227,7 @@ BRp.generateCutRectangle = function(){
 };
 
 BRp.registerNodeShapes = function(){
-  var nodeShapes = this.nodeShapes = {};
+  var nodeShapes = this.nodeShapes = BRp.nodeShapes;
   var renderer = this;
 
   this.generateEllipse();
@@ -310,7 +312,8 @@ BRp.registerNodeShapes = function(){
     // create and cache new shape
     return renderer.generatePolygon( name, points );
   };
-
+  
+  sbgn.registerSbgnNodeShapes();
 };
 
 module.exports = BRp;

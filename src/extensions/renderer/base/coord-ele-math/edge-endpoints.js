@@ -2,6 +2,7 @@
 
 var math = require( '../../../../math' );
 var is = require( '../../../../is' );
+var sbgn = require( '../../../../sbgn' );
 
 var BRp = {};
 
@@ -41,12 +42,24 @@ BRp.manualEndptToPx = function( node, prop ){
       npos.y + Math.sin( angle ) * l
     ];
 
-    return r.nodeShapes[ this.getNodeShape( node ) ].intersectLine(
-      npos.x, npos.y,
-      w, h,
-      p[0], p[1],
-      0
-    );
+    var intersection;
+    
+    if(sbgn.isNodeShapeTotallyOverriden(this, node)) {
+      intersection = r.nodeShapes[ this.getNodeShape( node ) ].intersectLine(
+        node,
+        p[0], p[1]
+      );
+    }
+    else {
+      intersection = r.nodeShapes[ this.getNodeShape( node ) ].intersectLine(
+        npos.x, npos.y,
+        w, h,
+        p[0], p[1],
+        0
+      );
+    }
+    
+    return intersection;
   }
 };
 
@@ -114,15 +127,25 @@ BRp.findEndpoints = function( edge ){
       p1_i = [ srcPos.x, srcPos.y ];
     }
 
-    intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
-      tgtPos.x,
-      tgtPos.y,
-      target.outerWidth(),
-      target.outerHeight(),
-      p1_i[0],
-      p1_i[1],
-      0
-    );
+    if (sbgn.isNodeShapeTotallyOverriden(this, target)) {
+      intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
+        target,
+        p1_i[0],
+        p1_i[1],
+        0
+      );
+    }
+    else {
+      intersect = r.nodeShapes[ this.getNodeShape( target ) ].intersectLine(
+        tgtPos.x,
+        tgtPos.y,
+        target.outerWidth(),
+        target.outerHeight(),
+        p1_i[0],
+        p1_i[1],
+        0
+      );
+    }
   }
 
   var arrowEnd = math.shortenIntersection(
@@ -155,15 +178,24 @@ BRp.findEndpoints = function( edge ){
       p2_i = [ tgtPos.x, tgtPos.y ];
     }
 
-    intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
-      srcPos.x,
-      srcPos.y,
-      source.outerWidth(),
-      source.outerHeight(),
-      p2_i[0],
-      p2_i[1],
-      0
-    );
+    if (sbgn.isNodeShapeTotallyOverriden(this, source)) {
+      intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
+        source,
+        p2_i[0],
+        p2_i[1]
+      );
+    }
+    else {
+      intersect = r.nodeShapes[ this.getNodeShape( source ) ].intersectLine(
+        srcPos.x,
+        srcPos.y,
+        source.outerWidth(),
+        source.outerHeight(),
+        p2_i[0],
+        p2_i[1],
+        0
+      );
+    }
   }
 
   var arrowStart = math.shortenIntersection(
