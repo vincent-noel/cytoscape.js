@@ -599,14 +599,18 @@ var boundingBoxImpl = function( ele, options ){
       
       for (var i = 0; stateAndInfos && i < stateAndInfos.length; i++) {
         var state = stateAndInfos[i];
+        if(!state.isDisplayed) {
+          continue;
+        }
         var stateWidth = state.bbox.w;
         var stateHeight = state.bbox.h;
+        var coords = state.getAbsoluteCoord();
+
+        var stateMinY = coords.y - stateHeight / 2;
+        var stateMaxY = coords.y + stateHeight / 2;
         
-        var stateMinY = state.bbox.y * ele.height() / 100 + y - stateHeight / 2;
-        var stateMaxY = state.bbox.y * ele.height() / 100 + y + stateHeight / 2;
-        
-        var stateMinX = state.bbox.x * ele.width() / 100 + x - stateWidth / 2;
-        var stateMaxX = state.bbox.x * ele.width() / 100 + x + stateWidth / 2;
+        var stateMinX = coords.x - stateWidth / 2;
+        var stateMaxX = coords.x + stateWidth / 2;
         
         if(!minY || stateMinY < minY) {
           minY = stateMinY;
