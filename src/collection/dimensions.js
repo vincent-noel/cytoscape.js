@@ -605,12 +605,13 @@ var boundingBoxImpl = function( ele, options ){
         var stateWidth = state.bbox.w;
         var stateHeight = state.bbox.h;
         var coords = state.getAbsoluteCoord();
+        var bw = ele.pstyle( 'border-width' ).pfValue;
 
-        var stateMinY = coords.y - stateHeight / 2;
-        var stateMaxY = coords.y + stateHeight / 2;
+        var stateMinY = coords.y - stateHeight / 2 - bw;
+        var stateMaxY = coords.y + stateHeight / 2 + bw;
         
-        var stateMinX = coords.x - stateWidth / 2;
-        var stateMaxX = coords.x + stateWidth / 2;
+        var stateMinX = coords.x - stateWidth / 2 - bw;
+        var stateMaxX = coords.x + stateWidth / 2 + bw;
         
         if(!minY || stateMinY < minY) {
           minY = stateMinY;
