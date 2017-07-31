@@ -75,3 +75,12 @@ In collection/dimensions.js
     Note that nomore there is cyVariables require node-shapes under base folder and use its nodeShapes property instead of using 'cyVariables.cyNodeShapes'
 
 Add sbgn.js under src folder and require it whenever it is used.
+
+%-------------------------------------------------------------%
+%                         SVG SUPPORT                         %
+%-------------------------------------------------------------%
+
+See: https://github.com/iVis-at-Bilkent/cytoscape.js/commit/5d7654e82edfe3f9c78f9be2537d86fc3915272a
+Related issue: https://github.com/iVis-at-Bilkent/newt/issues/147
+
+%-------------------------------------------------------------%
