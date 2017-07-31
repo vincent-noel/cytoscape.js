@@ -71,7 +71,7 @@
     "docs": "gulp docs",
     "docspub": "gulp docspub"
   },
-  "peerDependencies": {
+  "dependencies": {
     "canvas2svg": "kinimesi/canvas2svg"
   },
   "devDependencies": {
