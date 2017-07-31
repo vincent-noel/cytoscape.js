@@ -1,6 +1,7 @@
 'use strict';
 
 var is = require( '../../../is' );
+var C2S = require('canvas2svg');
 
 var CRp = {};
 
@@ -52,15 +53,19 @@ CRp.bufferCanvasImage = function( options ){
     scale *= pxRatio;
   }
 
-  var buffCanvas = document.createElement( 'canvas' ); // eslint-disable-line no-undef
+  if (options.svg){
+    var buffCanvas = buffCxt = new C2S(width, height);
+  } else {
+    var buffCanvas = document.createElement( 'canvas' ); // eslint-disable-line no-undef
 
-  buffCanvas.width = width;
-  buffCanvas.height = height;
+    buffCanvas.width = width;
+    buffCanvas.height = height;
 
-  buffCanvas.style.width = width + 'px';
-  buffCanvas.style.height = height + 'px';
+    buffCanvas.style.width = width + 'px';
+    buffCanvas.style.height = height + 'px';
 
-  var buffCxt = buffCanvas.getContext( '2d' );
+    var buffCxt = buffCanvas.getContext( '2d' );
+  }
 
   // Rasterize the layers, but only if container has nonzero size
   if( width > 0 && height > 0 ){
@@ -130,6 +135,9 @@ function b64UriToB64( b64uri ){
 };
 
 function output( options, canvas, mimeType ){
+  if (mimeType === 'image/svg')
+    return canvas.getSerializedSvg();
+
   var b64Uri = canvas.toDataURL( mimeType, options.quality );
 
   switch( options.output ){
@@ -151,6 +159,10 @@ CRp.png = function( options ){
 
 CRp.jpg = function( options ){
   return output( options, this.bufferCanvasImage( options ), 'image/jpeg' );
+};
+
+CRp.svg = function( options ){
+  return output( options, this.bufferCanvasImage( options ), 'image/svg' );
 };
 
 module.exports = CRp;

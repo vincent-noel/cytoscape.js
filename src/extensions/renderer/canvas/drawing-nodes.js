@@ -148,6 +148,35 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
   }
 
   //
+  // border
+
+  var borderWidth = node.pstyle( 'border-width' ).pfValue;
+  if( borderWidth > 0 ){
+
+    if( usePaths ){
+      context.stroke( path );
+    } else {
+      context.stroke();
+    }
+
+    if( borderStyle === 'double' ){
+      context.lineWidth = node.pstyle( 'border-width' ).pfValue / 3;
+
+      var gco = context.globalCompositeOperation;
+      context.globalCompositeOperation = 'destination-out';
+
+      if( usePaths ){
+        context.stroke( path );
+      } else {
+        context.stroke();
+      }
+
+      context.globalCompositeOperation = gco;
+    }
+
+  }
+
+  //
   // bg image
 
   var prevBging = _p.backgrounding;
@@ -169,7 +198,6 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
   // pie
 
   var darkness = node.pstyle( 'background-blacken' ).value;
-  var borderWidth = node.pstyle( 'border-width' ).pfValue;
 
   if( this.hasPie( node ) ){
     this.drawPie( context, node, parentOpacity );
@@ -215,34 +243,6 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
     } else {
       context.fill();
     }
-  }
-
-  //
-  // border
-
-  if( borderWidth > 0 ){
-
-    if( usePaths ){
-      context.stroke( path );
-    } else {
-      context.stroke();
-    }
-
-    if( borderStyle === 'double' ){
-      context.lineWidth = node.pstyle( 'border-width' ).pfValue / 3;
-
-      var gco = context.globalCompositeOperation;
-      context.globalCompositeOperation = 'destination-out';
-
-      if( usePaths ){
-        context.stroke( path );
-      } else {
-        context.stroke();
-      }
-
-      context.globalCompositeOperation = gco;
-    }
-
   }
 
   if( usePaths ){

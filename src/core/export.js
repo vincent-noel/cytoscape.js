@@ -16,6 +16,14 @@ var corefn = ({
     options.bg = options.bg || '#fff';
 
     return renderer.jpg( options );
+  },
+
+  svg: function( options ){
+    var renderer = this._private.renderer;
+    options = options || {};
+    options.svg = true;
+
+    return renderer.svg( options );
   }
 
 });
