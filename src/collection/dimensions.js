@@ -604,7 +604,7 @@ var boundingBoxImpl = function( ele, options ){
         }
         var stateWidth = state.bbox.w;
         var stateHeight = state.bbox.h;
-        var coords = state.getAbsoluteCoord();
+        var coords = sbgnviz.classes.StateVariable.getAbsoluteCoord(state);
         var bw = ele.pstyle( 'border-width' ).pfValue;
 
         var stateMinY = coords.y - stateHeight / 2 - bw;
