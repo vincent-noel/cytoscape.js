@@ -6,12 +6,12 @@ CRp.drawEdge = function( context, edge, shiftToOriginWithBb, drawLabel, drawOver
   var rs = edge._private.rscratch;
   var usePaths = this.usePaths();
 
+  if( !edge.visible() ){ return; }
+
   // if bezier ctrl pts can not be calculated, then die
-  if( rs.badLine || isNaN(rs.allpts[0]) ){ // isNaN in case edge is impossible and browser bugs (e.g. safari)
+  if( rs.badLine || rs.allpts == null || isNaN(rs.allpts[0]) ){ // isNaN in case edge is impossible and browser bugs (e.g. safari)
     return;
   }
-
-  if( !edge.visible() ){ return; }
 
   var bb;
   if( shiftToOriginWithBb ){
