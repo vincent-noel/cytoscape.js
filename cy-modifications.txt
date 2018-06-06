@@ -84,3 +84,12 @@ See: https://github.com/iVis-at-Bilkent/cytoscape.js/commit/5d7654e82edfe3f9c78f
 Related issue: https://github.com/iVis-at-Bilkent/newt/issues/147
 
 %-------------------------------------------------------------%
+
+%-------------------------------------------------------------%
+%                   BACKGROUND IMAGE SUPPORT                  %
+%-------------------------------------------------------------%
+
+See: https://github.com/iVis-at-Bilkent/cytoscape.js/commit/ef484bf687c870790a7e634b7ee9830bcaecd7a3
+Related issue: https://github.com/iVis-at-Bilkent/newt/issues/266
+
+%-------------------------------------------------------------%
