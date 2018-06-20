@@ -72,7 +72,7 @@
     "docspub": "gulp docspub"
   },
   "dependencies": {
-    "canvas2svg": "kinimesi/canvas2svg"
+    "canvas2svg": "ahmetcandiroglu/canvas2svg"
   },
   "devDependencies": {
     "benchmark": "^1.0.0",
