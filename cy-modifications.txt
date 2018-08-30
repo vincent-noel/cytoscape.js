@@ -147,3 +147,7 @@ Note that changes happened in Cytoscape.js after this commit.
 Replace drawNode() in src/extensions/renderer/canvas/drawing-nodes.js
 instead of the code segment followed by '// border' comment.
 Also use 'ahmetcandiroglu/canvas2svg' instead of 'kinimesi/canvas2svg#master'.
+
+Note: In sbgnviz renderer drawBorder() function of extensions/renderer/canvas/drawing-nodes.js
+is copied and updated because of the reasons explained there. If the function here is updated
+update the one in sbgnviz renderer as well.
