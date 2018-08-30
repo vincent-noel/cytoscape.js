@@ -8,8 +8,6 @@ function getShape( render, node ) {
 caller.draw = function( context, node, imgObj, render ) {
   var shape = getShape( render, node );
 
-  console.log( 'draw is called' );
-
   if( sbgn.sbgnShapes[ render.getNodeShape( node ) ] ) {
     shape.draw( context, node, imgObj );
   }

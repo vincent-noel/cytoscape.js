@@ -420,7 +420,6 @@ let boundingBoxImpl = function( ele, options ){
       var stateAndInfos = ele._private.data.statesandinfos;
       var minY, maxY, minX, maxX;
 
-      console.log( 'updating borders' );
       for (var i = 0; stateAndInfos && i < stateAndInfos.length; i++) {
         var state = stateAndInfos[i];
         if(!state.isDisplayed) {
