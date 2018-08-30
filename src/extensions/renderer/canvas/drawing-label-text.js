@@ -1,5 +1,3 @@
-'use strict';
-
 var util = require( '../../../util' );
 var math = require( '../../../math' );
 
@@ -191,7 +189,7 @@ CRp.drawText = function( context, ele, prefix ){
     textX += marginX;
     textY += marginY;
 
-    var rotation = ele.pstyle( 'text-rotation' );
+    var rotation = ele.pstyle( pdash + 'text-rotation' );
     var theta;
 
     if( rotation.strValue === 'autorotate' ){

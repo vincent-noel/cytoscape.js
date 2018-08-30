@@ -1,5 +1,5 @@
 {
-  "version": "3.1.1",
+  "version": "3.2.16",
 
   "fnArgLinks": {
     "selector": "#selectors",
@@ -96,24 +96,10 @@
 
             {
               "name": "cy.collection",
-              "descr": "Return a new collection.",
+              "descr": "Return a new, empty collection.",
               "formats": [
                 {
                   "descr": "Get an empty collection."
-                },
-
-                {
-                  "descr": "Get a collection from elements in the graph matching the specified selector.",
-                  "args": [
-                    { "name": "selector", "descr": "Elements matching this selector are in the returned collection." }
-                  ]
-                },
-
-                {
-                  "descr": "Get a collection from an array of elements.",
-                  "args": [
-                    { "name": "elesArray", "descr": "The elements in this array are in the returned collection." }
-                  ]
                 }
               ],
               "md": "core/collection"
@@ -267,7 +253,7 @@
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A selector to specify elements for which the handler is triggered.", "optional": true },
+                    { "name": "selector", "descr": "A selector to specify elements for which the handler is ran.", "optional": true },
                     { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
@@ -278,12 +264,12 @@
             {
               "name": "cy.promiseOn",
               "pureAliases": ["cy.pon"],
-              "descr": "Get a promise that is resolved with the first of any of the specified events triggered on the graph.",
+              "descr": "Get a promise that is resolved with the first of any of the specified events emitted on the graph.",
               "formats": [
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A selector to specify elements for which the handler is triggered.", "optional": true }
+                    { "name": "selector", "descr": "A selector to specify elements for which the handler is ran.", "optional": true }
                   ]
                 }
               ],
@@ -292,12 +278,12 @@
 
             {
               "name": "cy.one",
-              "descr": "Bind to events that occur in the graph, and trigger the handler only once.",
+              "descr": "Bind to events that occur in the graph, and run the handler only once.",
               "formats": [
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A selector to specify elements for which the handler is triggered.", "optional": true },
+                    { "name": "selector", "descr": "A selector to specify elements for which the handler is ran.", "optional": true },
                     { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
@@ -306,8 +292,8 @@
             },
 
             {
-              "name": "cy.off",
-              "pureAliases": ["cy.unbind", "cy.unlisten", "cy.removeListener"],
+              "name": "cy.removeListener",
+              "pureAliases": ["cy.off", "cy.unbind", "cy.unlisten"],
               "descr": "Remove event handlers.",
               "formats": [
                 {
@@ -318,22 +304,22 @@
                   ]
                 }
               ],
-              "md": "core/off"
+              "md": "core/removeListener"
             },
 
             {
-              "name": "cy.trigger",
-              "pureAliases": ["cy.emit"],
-              "descr": "Trigger one or more events.",
+              "name": "cy.emit",
+              "pureAliases": ["cy.trigger"],
+              "descr": "Emit one or more events.",
               "formats": [
                 {
                   "args": [
-                    { "name": "events", "descr": "A space separated list of event names to trigger." },
+                    { "name": "events", "descr": "A space separated list of event names to emit." },
                     { "name": "extraParams", "descr": "An array of additional parameters to pass to the handler.", "optional": true }
                   ]
                 }
               ],
-              "md": "core/trigger"
+              "md": "core/emit"
             },
 
             {
@@ -685,7 +671,15 @@
                       "name": "options",
                       "descr": "An object containing the details of the animation.",
                       "fields": [
-                        { "name": "zoom", "descr": "A zoom level to which the graph will be animated." },
+                        {
+                          "name": "zoom",
+                          "descr": "A zoom level (number) or a zoom configuration object to which the graph will be animated.",
+                          "fields": [
+                            { "name": "level", "descr": "The zoom level to use." },
+                            { "name": "position", "descr": "The position about which zooming occurs.  This automatically modifies the pan such that the specified model position remains at the same position in the viewport extent during zooming." },
+                            { "name": "renderedPosition", "descr": "The rendered position about which zooming occurs, as an alternative to using the model position.  This automatically modifies the pan such that the model position, corresponding to the rendered position at the start of the animation, remains at the same position in the viewport extent during zooming." }
+                          ]
+                        },
                         { "name": "pan", "descr": "A panning position to which the graph will be animated." },
                         { "name": "panBy", "descr": "A relative panning position to which the graph will be animated." },
                         {
@@ -716,6 +710,7 @@
               "md": "core/animate"
             },
 
+          "fns": [
             {
               "name": "cy.animation",
               "descr": "Get an [animation](#animations) of the viewport.",
@@ -726,7 +721,15 @@
                       "name": "options",
                       "descr": "An object containing the details of the animation.",
                       "fields": [
-                        { "name": "zoom", "descr": "A zoom level to which the graph will be animated." },
+                        {
+                          "name": "zoom",
+                          "descr": "A zoom level (number) or a zoom configuration object to which the graph will be animated.",
+                          "fields": [
+                            { "name": "level", "descr": "The zoom level to use." },
+                            { "name": "position", "descr": "The position about which zooming occurs.  This automatically modifies the pan such that the specified model position remains at the same position in the viewport extent during zooming." },
+                            { "name": "renderedPosition", "descr": "The rendered position about which zooming occurs, as an alternative to using the model position.  This automatically modifies the pan such that the model position, corresponding to the rendered position at the start of the animation, remains at the same position in the viewport extent during zooming." }
+                          ]
+                        },
                         { "name": "pan", "descr": "A panning position to which the graph will be animated." },
                         { "name": "panBy", "descr": "A relative panning position to which the graph will be animated." },
                         {
@@ -921,6 +924,81 @@
               "md": "core/json"
             }
           ]
+        },
+
+        {
+          "name": "Export",
+
+          "fns": [
+            {
+              "name": "cy.png",
+              "descr": "Export the current graph view as a PNG image.",
+              "formats": [
+                {
+                  "args": [
+                    {
+                      "name": "options",
+                      "descr": "The export options.",
+                      "fields": [
+                        { "name": "output", "descr": "Whether the output should be `'base64uri'` (default), `'base64'`, or `'blob'`." },
+                        { "name": "bg", "descr": "The background colour of the image (transparent by default)." },
+                        { "name": "full", "descr": "Whether to export the current viewport view (`false`, default) or the entire graph (`true`)." },
+                        { "name": "scale", "descr": "This value specifies a positive number that scales the size of the resultant image." },
+                        { "name": "maxWidth", "descr": "Specifies the scale automatically in combination with `maxHeight` such that the resultant image is no wider than `maxWidth`." },
+                        { "name": "maxHeight", "descr": "Specifies the scale automatically in combination with `maxWidth` such that the resultant image is no taller than `maxHeight`." }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "md": "core/png"
+            },
+
+            {
+              "name": "cy.jpg",
+              "pureAliases": ["cy.jpeg"],
+              "descr": "Export the current graph view as a JPG image.",
+              "formats": [
+                {
+                  "args": [
+                    {
+                      "name": "options",
+                      "descr": "The export options.",
+                      "fields": [
+                        { "name": "output", "descr": "Whether the output should be `'base64uri'` (default), `'base64'`, or `'blob'`." },
+                        { "name": "bg", "descr": "The background colour of the image (white by default)." },
+                        { "name": "full", "descr": "Whether to export the current viewport view (`false`, default) or the entire graph (`true`)." },
+                        { "name": "scale", "descr": "This value specifies a positive number that scales the size of the resultant image." },
+                        { "name": "maxWidth", "descr": "Specifies the scale automatically in combination with `maxHeight` such that the resultant image is no wider than `maxWidth`." },
+                        { "name": "maxHeight", "descr": "Specifies the scale automatically in combination with `maxWidth` such that the resultant image is no taller than `maxHeight`." },
+                        { "name": "quality", "descr": "Specifies the quality of the image from `0` (low quality, low filesize) to `1` (high quality, high filesize).  If not set, the browser's default quality value is used." }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "md": "core/jpg"
+            },
+
+            {
+              "name": "cy.json",
+              "descr": "Import or export the graph in the same JSON format used at initialisation.",
+              "formats": [
+                {
+                  "descr": "Export the graph as JSON.",
+                  "args": []
+                },
+
+                {
+                  "descr": "Import the graph as JSON, updating only the fields specified.",
+                  "args": [
+                    { "name": "cyJson", "descr": "The object with the fields corresponding to the states that should be changed." }
+                  ]
+                }
+              ],
+              "md": "core/json"
+            }
+          ]
         }
 
 
@@ -934,6 +1012,11 @@
         {
           "name": "Graph manipulation",
           "fns": [
+            {
+              "name": "ele.cy",
+              "descr": "Get the core instance that owns the element."
+            },
+
             {
               "name": "eles.remove",
               "descr": "Remove the elements from the graph, and return all elements removed by this call.",
@@ -1007,7 +1090,7 @@
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is triggered.", "optional": true },
+                    { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is ran.", "optional": true },
                     { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
@@ -1018,12 +1101,12 @@
             {
               "name": "eles.promiseOn",
               "pureAliases": ["eles.pon"],
-              "descr": "Get a promise that is resolved with the first of any of the specified events triggered on any of the elements in the collection.",
+              "descr": "Get a promise that is resolved with the first of any of the specified events emitted on any of the elements in the collection.",
               "formats": [
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A selector to specify elements for which the handler is triggered.", "optional": true }
+                    { "name": "selector", "descr": "A selector to specify elements for which the handler is emitted.", "optional": true }
                   ]
                 }
               ],
@@ -1032,12 +1115,12 @@
 
             {
               "name": "eles.one",
-              "descr": "Bind a callback function that is triggered once per event per element.",
+              "descr": "Bind a callback function that is emitted once per event per element.",
               "formats": [
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is triggered.", "optional": true },
+                    { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is ran.", "optional": true },
                     { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
@@ -1047,12 +1130,12 @@
 
             {
               "name": "eles.once",
-              "descr": "Bind a callback function that is triggered once per event per collection.",
+              "descr": "Bind a callback function that is emitted once per event per collection.",
               "formats": [
                 {
                   "args": [
                     { "name": "events", "descr": "A space separated list of event names." },
-                    { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is triggered.", "optional": true },
+                    { "name": "selector", "descr": "A delegate selector to specify child elements for which the handler is ran.", "optional": true },
                     { "name": "function(event)", "descr": "The handler function that is called when one of the specified events occurs.", "fields": [ { "name": "event", "descr": "The event object." } ] }
                   ]
                 }
@@ -1061,8 +1144,8 @@
             },
 
             {
-              "name": "eles.off",
-              "pureAliases": ["eles.unbind", "eles.unlisten", "eles.removeListener"],
+              "name": "eles.removeListener",
+              "pureAliases": ["eles.off", "eles.unbind", "eles.unlisten"],
               "descr": "Unbind one or more callback functions on the elements.",
               "formats": [
                 {
@@ -1073,22 +1156,22 @@
                   ]
                 }
               ],
-              "md": "collection/off"
+              "md": "collection/removeListener"
             },
 
             {
-              "name": "eles.trigger",
-              "pureAliases": ["eles.emit"],
-              "descr": "Trigger events on the elements.",
+              "name": "eles.emit",
+              "pureAliases": ["eles.trigger"],
+              "descr": "Emit events on the elements.",
               "formats": [
                 {
                   "args": [
-                    { "name": "events", "descr": "A space separated list of event names to trigger." },
+                    { "name": "events", "descr": "A space separated list of event names to emit." },
                     { "name": "extraParams", "descr": "An array of additional parameters to pass to the handler.", "optional": true }
                   ]
                 }
               ],
-              "md": "collection/trigger"
+              "md": "collection/emit"
             }
           ]
         },
@@ -1378,6 +1461,27 @@
             },
 
             {
+              "name": "nodes.shift",
+              "descr": "Shift the positions of the nodes by a given model position vector.",
+              "formats": [
+                {
+                  "descr": "Shift the nodes by one of `'x'` or `'y'`.",
+                  "args": [
+                    { "name": "dimension", "descr": "The position dimension to shift." },
+                    { "name": "value", "descr": "The value to shift the dimension." }
+                  ]
+                },
+
+                {
+                  "descr": "Shift the nodes by a position vector.",
+                  "args": [
+                    { "name": "pos", "descr": "An object specifying name-value pairs representing dimensions to shift." }
+                  ]
+                }
+              ]
+            },
+
+            {
               "name": "nodes.positions",
               "pureAliases": [ "nodes.modelPositions", "nodes.points" ],
               "descr": "Set the (model) positions of several nodes with a function.",
@@ -1509,7 +1613,8 @@
                       "fields": [
                         { "name": "includeNodes", "descr": "A boolean indicating whether to include nodes in the bounding box (default `true`)." },
                         { "name": "includeEdges", "descr": "A boolean indicating whether to include edges in the bounding box (default `true`)." },
-                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box (default `true`)." }
+                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box (default `true`)." },
+                        { "name": "includeOverlays", "descr": "A boolean indicating whether to include overlays (such as the one which appears when a node is clicked) in the bounding box (default `true`)." }
                       ]
                     }
                   ]
@@ -1533,7 +1638,8 @@
                       "fields": [
                         { "name": "includeNodes", "descr": "A boolean indicating whether to include nodes in the bounding box (default `true`)." },
                         { "name": "includeEdges", "descr": "A boolean indicating whether to include edges in the bounding box (default `true`)." },
-                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box (default `true`)." }
+                        { "name": "includeLabels", "descr": "A boolean indicating whether to include labels in the bounding box (default `true`)." },
+                        { "name": "includeOverlays", "descr": "A boolean indicating whether to include overlays (such as the one which appears when a node is clicked) in the bounding box (default `true`)." }
                       ]
                     }
                   ]
@@ -1586,6 +1692,39 @@
               "descr": "Gets whether the element is active (e.g. on user tap, grab, etc)."
             }
 
+          ]
+        },
+
+        {
+          "name": "Edge points",
+          "fns": [
+            {
+              "name": "edge.controlPoints",
+              "descr": "Get an array of control point model positions for a `curve-style: bezier` or `curve-style: unbundled-bezier` edge.",
+              "md": "collection/controlPoints"
+            },
+
+            {
+              "name": "edge.segmentPoints",
+              "descr": "Get an array of segment point model positions (i.e. bend points) for a `curve-style: segments` edge.",
+              "md": "collection/segmentPoints"
+            },
+
+            {
+              "name": "edge.sourceEndpoint",
+              "descr": "Get the model position of where the edge ends, towards the source node."
+            },
+
+            {
+              "name": "edge.targetEndpoint",
+              "descr": "Get the model position of where the edge ends, towards the target node."
+            },
+
+            {
+              "name": "edge.midpoint",
+              "descr": "Get the model position of the midpoint of the edge.",
+              "md": "collection/midpoint.md"
+            }
           ]
         },
 
@@ -1804,6 +1943,19 @@
                   "descr": "Set several particular style property values.",
                   "args": [
                     { "name": "obj", "descr": "An object of style property name-value pairs to set." }
+                  ]
+                },
+
+                {
+                  "name": "eles.removeStyle",
+                  "descr": "Remove all style overrides."
+                },
+
+                {
+                  "name": "eles.removeStyle",
+                  "descr": "Remove specific style overrides.",
+                  "args": [
+                    { "name": "names", "descr": "A space-separated list of property names to remove overrides." }
                   ]
                 }
               ],
@@ -2183,6 +2335,11 @@
                   ]
                 }
               ]
+            },
+
+            {
+              "name": "eles.toArray",
+              "descr": "Get the collection as an array, maintaining the order of the elements."
             }
           ]
         },
@@ -2190,6 +2347,17 @@
         {
           "name": "Building & filtering",
           "fns": [
+            {
+              "name": "eles.getElementById",
+              "pureAliases": ["eles.$id"],
+              "descr": "Get an element in the collection from its ID in a very performant way.",
+              "formats": [
+                { "args": [
+                  { "name": "id", "descr": "The ID of the element to get." }
+                ] }
+              ]
+            },
+
             {
               "name": "eles.union",
               "pureAliases": [ "eles.add", "eles.or", "eles['u']", "eles['+']", "eles['|']" ],
@@ -2294,6 +2462,52 @@
                 }
               ],
               "md": "collection/diff"
+            },
+
+            {
+              "name": "eles.merge",
+              "descr": "Perform a in-place merge of the given elements into the calling collection.",
+              "formats": [
+                {
+                  "args": [
+                    { "name": "eles", "descr": "The elements to merge in-place." }
+                  ]
+                },
+
+                {
+                  "args": [
+                    { "name": "selector", "descr": "A selector representing the elements to merge.  All elements in the graph matching the selector are used as the passed collection." }
+                  ]
+                }
+              ],
+              "md": "collection/merge"
+            },
+
+            {
+              "name": "eles.unmerge",
+              "descr": "Perform an in-place operation on the calling collection to remove the given elements.",
+              "formats": [
+                {
+                  "descr": "Set the positions via a function.",
+                  "args": [
+                    { "name": "eles", "descr": "The elements to remove in-place." }
+                  ]
+                },
+
+                {
+                  "args": [
+                    { "name": "selector", "descr": "A selector representing the elements to remove.  All elements in the graph matching the selector are used as the passed collection." }
+                  ]
+                },
+
+                {
+                  "descr": "Set positions for all nodes based on a single position object.",
+                  "args": [
+                    { "name": "pos", "descr": "An object specifying name-value pairs representing dimensions to set." }
+                  ]
+                }
+              ],
+              "md": "collection/unmerge"
             },
 
             {
@@ -3210,7 +3424,7 @@
             {
               "name": "layout.promiseOn",
               "pureAliases": ["layout.pon"],
-              "descr": "Get a promise that is resolved with the first of any of the specified events triggered on the layout.",
+              "descr": "Get a promise that is resolved with the first of any of the specified events emitted on the layout.",
               "formats": [
                 {
                   "args": [
@@ -3223,7 +3437,7 @@
 
             {
               "name": "layout.one",
-              "descr": "Bind to events that are emitted by the layout, and trigger the handler only once.",
+              "descr": "Bind to events that are emitted by the layout, and run the handler only once.",
               "formats": [
                 {
                   "args": [
@@ -3237,8 +3451,8 @@
             },
 
             {
-              "name": "layout.off",
-              "pureAliases": ["layout.unbind", "layout.unlisten", "layout.removeListener"],
+              "name": "layout.removeListener",
+              "pureAliases": ["layout.off", "layout.unbind", "layout.unlisten"],
               "descr": "Remove event handlers on the layout.",
               "formats": [
                 {
@@ -3248,22 +3462,22 @@
                   ]
                 }
               ],
-              "md": "layout/off"
+              "md": "layout/removeListener"
             },
 
             {
-              "name": "layout.trigger",
-              "pureAliases": ["layout.emit"],
-              "descr": "Trigger one or more events on the layout.",
+              "name": "layout.emit",
+              "pureAliases": ["layout.trigger"],
+              "descr": "Emit one or more events on the layout.",
               "formats": [
                 {
                   "args": [
-                    { "name": "events", "descr": "A space separated list of event names to trigger." },
+                    { "name": "events", "descr": "A space separated list of event names to emit." },
                     { "name": "extraParams", "descr": "An array of additional parameters to pass to the handler.", "optional": true }
                   ]
                 }
               ],
-              "md": "layout/trigger"
+              "md": "layout/emit"
             }
           ]
         }

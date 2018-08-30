@@ -1,5 +1,3 @@
-'use strict';
-
 var math = require( '../../../../math' );
 var is = require( '../../../../is' );
 var util = require( '../../../../util' );
@@ -308,6 +306,9 @@ BRp.getLabelText = function( ele, prefix ){
       return util.getPrefixedProperty( _p.rscratch, propName, prefix );
     }
   };
+
+  // for empty text, skip all processing
+  if( !text ){ return ''; }
 
   if( textTransform == 'none' ){
     // passthrough

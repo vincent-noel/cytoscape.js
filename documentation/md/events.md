@@ -7,7 +7,7 @@ Fields:
  * `cy` : a reference to the corresponding core instance
  * `target` : indicates the element or core that first caused the event
  * `type` : the event type string (e.g. `"tap"`)
- * `namespace` : the event namespace string (e.g. `"foo"` for `"foo.tap"`)
+ * `namespace` : the event namespace string (e.g. `"foo"` for `"tap.foo"`)
  * `timeStamp` : Unix epoch time of event in milliseconds
 
 Fields for only user input device events:
@@ -78,6 +78,7 @@ These events are custom to Cytoscape.js.  You can bind to these events for colle
  * `data` : when an element's data is changed
  * `scratch` : when an element's scratchpad data is changed
  * `style` : when an element's style is changed
+ * `background` : when a node's background image is loaded
 
 
 ## Graph events
@@ -92,4 +93,5 @@ These events are custom to Cytoscape.js, and they occur on the core.
  * `render` : when the viewport is (re)rendered
  * `pan` : when the viewport is panned
  * `zoom` : when the viewport is zoomed
+ * `viewport` : when the viewport is changed (i.e. from a `pan`, a `zoom`, or from both when zooming about a point -- e.g. pinch-to-zoom)
  * `resize` : when the viewport is resized (usually by calling `cy.resize()`, a `window` resize, or toggling a class on the Cytoscape.js div)

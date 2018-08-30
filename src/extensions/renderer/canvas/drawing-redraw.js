@@ -1,5 +1,3 @@
-'use strict';
-
 var CRp = {};
 
 var util = require( '../../../util' );
@@ -573,7 +571,7 @@ CRp.render = function( options ){
   }
 
   if( !forcedContext ){
-    cy.trigger('render');
+    cy.emit('render');
   }
 
 };

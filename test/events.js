@@ -1,5 +1,8 @@
 var expect = require('chai').expect;
-var cytoscape = require('../src', cytoscape);
+var cytoscape = require('../src/test.js', cytoscape);
+
+/* eslint-disable no-unused-vars */
+/* global Promise */
 
 describe('Events', function(){
 
@@ -46,7 +49,7 @@ describe('Events', function(){
 
     var handler = function(){
       triggers++;
-    }
+    };
 
     it('`add` for new element', function(){
       cy.on('add', handler);
@@ -150,7 +153,7 @@ describe('Events', function(){
     var triggers = 0;
     var handler = function(){
       triggers++;
-    }
+    };
 
     beforeEach(function(){
       triggers = 0;
@@ -296,6 +299,55 @@ describe('Events', function(){
       expect( coreTrigger ).to.be.true;
     });
 
+    it('should pass extra args to core when bubbled', function( done ){
+      var node = cy.$('#n1');
+
+      cy.on('foo', function( event, bar, baz ){
+        expect(bar).to.equal('bar');
+        expect(baz).to.equal('baz');
+
+        done();
+      });
+
+      node.trigger('foo', ['bar', 'baz']);
+    });
+
+    it('should pass extra args to parent node when bubbled', function( done ){
+      cy.$('#n4').on('foo', function( event, bar, baz ){
+        expect(bar).to.equal('bar');
+        expect(baz).to.equal('baz');
+
+        done();
+      });
+
+      cy.$('#n5').trigger('foo', ['bar', 'baz']);
+    });
+
+    it('should get the element context when bubbled with a delegate selector on the core', function( done ){
+      var n4 = cy.$('#n4');
+
+      cy.on('foo', 'node', function(){
+        expect( this[0] === n4[0] ).to.be.true;
+
+        done();
+      });
+
+      n4.emit('foo');
+    });
+
+    it('should get the element context when bubbled with a delegate selector on a collection', function( done ){
+      var n4 = cy.$('#n4');
+      var n5 = cy.$('#n5');
+
+      n4.on('foo', 'node', function(){
+        expect( this[0] === n5[0] ).to.be.true;
+
+        done();
+      });
+
+      n5.emit('foo');
+    });
+
   });
 
 
@@ -354,19 +406,6 @@ describe('Events', function(){
 
     });
 
-    it('binds with an event map', function(){
-      var triggers = 0;
-
-      cy.on({
-        'foo': function(){ triggers++; },
-        'bar': function(){ triggers++; }
-      });
-
-      cy.trigger('foo bar');
-
-      expect( triggers ).to.equal(2);
-    });
-
     it('has event object structure', function(done){
 
       cy
@@ -387,6 +426,73 @@ describe('Events', function(){
 
     });
 
+    it('allows dash in event name', function(){
+      var foo = false;
+      var fooBar = false;
+
+      cy.on('foo-bar');
+
+      cy.on('foo', function(){ foo = true; });
+
+      cy.on('foo-bar', function(){ fooBar = true; });
+
+      cy.emit('foo-bar');
+
+      expect(foo).to.be.false;
+      expect(fooBar).to.be.true;
+    });
+
+    it('allows underscore in event namespace', function(){
+      var bar = false;
+      var barBaz = false;
+      var foo = false;
+
+      cy.on('foo.bar', function(){ bar = true; });
+
+      cy.on('foo.bar-baz', function(){ barBaz = true; });
+
+      cy.on('foo', function(){ foo = true; });
+
+      cy.emit('foo.bar-baz');
+
+      expect(foo, 'foo').to.be.true;
+      expect(bar, 'foo.bar').to.be.false;
+      expect(barBaz, 'foo.bar-baz').to.be.true;
+    });
+
+    it('allows dash in event name', function(){
+      var foo = false;
+      var fooBar = false;
+
+      cy.on('foo_bar');
+
+      cy.on('foo', function(){ foo = true; });
+
+      cy.on('foo_bar', function(){ fooBar = true; });
+
+      cy.emit('foo_bar');
+
+      expect(foo).to.be.false;
+      expect(fooBar).to.be.true;
+    });
+
+    it('allows underscore in event namespace', function(){
+      var bar = false;
+      var barBaz = false;
+      var foo = false;
+
+      cy.on('foo.bar', function(){ bar = true; });
+
+      cy.on('foo.bar_baz', function(){ barBaz = true; });
+
+      cy.on('foo', function(){ foo = true; });
+
+      cy.emit('foo.bar_baz');
+
+      expect(foo, 'foo').to.be.true;
+      expect(bar, 'foo.bar').to.be.false;
+      expect(barBaz, 'foo.bar_baz').to.be.true;
+    });
   });
 
   describe('cy.one()', function(){
@@ -416,22 +522,6 @@ describe('Events', function(){
       expect( triggers ).to.equal(1);
 
       cy.$('#n1').trigger('foo');
-      expect( triggers ).to.equal(1);
-    });
-
-    it('triggers once with map', function(){
-      var triggers = 0;
-
-      cy.one({
-        'foo': function(e){
-          triggers++;
-        }
-      });
-
-      cy.trigger('foo');
-      expect( triggers ).to.equal(1);
-
-      cy.trigger('foo');
       expect( triggers ).to.equal(1);
     });
 
@@ -476,22 +566,6 @@ describe('Events', function(){
       });
 
       cy.off('foo');
-
-      cy.trigger('foo');
-      expect( triggers ).to.equal(0);
-    });
-
-    it('removes a handler via events map', function(){
-      var triggers = 0;
-      var handler;
-
-      cy.on('foo', handler = function(){
-        triggers++;
-      });
-
-      cy.off({
-        'foo': handler
-      });
 
       cy.trigger('foo');
       expect( triggers ).to.equal(0);
@@ -561,6 +635,24 @@ describe('Events', function(){
       expect( triggers ).to.equal(0);
     });
 
+    // #1980
+    it('removes a delegated handler when a non-delegated handler also exists', function(){
+      var Na = 0;
+      var Nb = 0;
+
+      var a = function(){ Na++; };
+      var b = function(){ Nb++; };
+
+      cy.on('foo', a);
+      cy.on('foo', 'node', b);
+      cy.off('foo', 'node', b);
+
+      cy.nodes()[0].trigger('foo');
+
+      expect(Na).to.equal(1);
+      expect(Nb).to.equal(0);
+    });
+
   });
 
   describe('cy.trigger()', function(){
@@ -594,7 +686,7 @@ describe('Events', function(){
 
     var triggers = 0;
     var n1;
-    var handler = function(){ triggers++; }
+    var handler = function(){ triggers++; };
 
     beforeEach(function(){
       triggers = 0;
@@ -619,13 +711,105 @@ describe('Events', function(){
       expect( triggers ).to.equal(1);
     });
 
+    it('should not trigger handler added handler', function(){
+      var n = cy.nodes()[0];
+      var outer = false;
+      var inner = false;
+      var addedInner = false;
+
+      n.on('foo', function(){
+        outer = true;
+
+        if( !addedInner ){
+          addedInner = true;
+
+          n.on('foo', function(){
+            inner = true;
+          });
+        }
+      });
+
+      n.trigger('foo');
+
+      expect(outer, 'outer').to.be.true;
+      expect(inner, 'inner').to.be.false;
+    });
+
+    it('allows dash in event name', function(){
+      var n = cy.nodes()[0];
+      var foo = false;
+      var fooBar = false;
+
+      n.on('foo', function(){ foo = true; });
+
+      n.on('foo-bar', function(){ fooBar = true; });
+
+      n.emit('foo-bar');
+
+      expect(foo).to.be.false;
+      expect(fooBar).to.be.true;
+    });
+
+    it('allows dash in event namespace', function(){
+      var n = cy.nodes()[0];
+      var bar = false;
+      var barBaz = false;
+      var foo = false;
+
+      n.on('foo.bar', function(){ bar = true; });
+
+      n.on('foo.bar-baz', function(){ barBaz = true; });
+
+      n.on('foo', function(){ foo = true; });
+
+      n.emit('foo.bar-baz');
+
+      expect(foo, 'foo').to.be.true;
+      expect(bar, 'foo.bar').to.be.false;
+      expect(barBaz, 'foo.bar-baz').to.be.true;
+    });
+
+    it('allows underscore in event name', function(){
+      var n = cy.nodes()[0];
+      var foo = false;
+      var fooBar = false;
+
+      n.on('foo', function(){ foo = true; });
+
+      n.on('foo_bar', function(){ fooBar = true; });
+
+      n.emit('foo_bar');
+
+      expect(foo).to.be.false;
+      expect(fooBar).to.be.true;
+    });
+
+    it('allows underscore in event namespace', function(){
+      var n = cy.nodes()[0];
+      var bar = false;
+      var barBaz = false;
+      var foo = false;
+
+      n.on('foo.bar', function(){ bar = true; });
+
+      n.on('foo.bar_baz', function(){ barBaz = true; });
+
+      n.on('foo', function(){ foo = true; });
+
+      n.emit('foo.bar_baz');
+
+      expect(foo, 'foo').to.be.true;
+      expect(bar, 'foo.bar').to.be.false;
+      expect(barBaz, 'foo.bar_baz').to.be.true;
+    });
+
   });
 
   describe('eles.one()', function(){
 
     var triggers = 0;
     var n1;
-    var handler = function(){ triggers++; }
+    var handler = function(){ triggers++; };
 
     beforeEach(function(){
       triggers = 0;
@@ -656,13 +840,31 @@ describe('Events', function(){
       expect( triggers ).to.equal(1);
     });
 
+    it('removed one event stays removed', function( next ){
+      var n = cy.nodes()[0];
+      var count = 0;
+      var inc = function(){ ++count; };
+
+      n.pon('foo').then( inc );
+      n.one('foo', inc );
+
+      n.trigger('foo');
+
+      setTimeout(function(){
+        expect( count ).to.equal(2);
+        next();
+      }, 50);
+
+      n.trigger('foo');
+    });
+
   });
 
   describe('eles.once()', function(){
 
     var triggers = 0;
     var n1;
-    var handler = function(){ triggers++; }
+    var handler = function(){ triggers++; };
 
     beforeEach(function(){
       triggers = 0;
@@ -699,7 +901,7 @@ describe('Events', function(){
 
     var triggers = 0;
     var n1;
-    var handler = function(){ triggers++; }
+    var handler = function(){ triggers++; };
 
     beforeEach(function(){
       triggers = 0;
@@ -733,13 +935,91 @@ describe('Events', function(){
       expect( triggers ).to.equal(0);
     });
 
+    it('should not affect other listeners', function(){
+      var n = cy.nodes()[0];
+      var foo1 = false;
+      var foo2 = false;
+      var foo1cb, foo2cb;
+
+      n.on('foo', foo1cb = function(){
+        foo1 = true;
+
+        n.off('foo', foo1cb);
+      });
+
+      n.on('foo', foo2cb = function(){
+        foo2 = true;
+      });
+
+      n.trigger('foo');
+
+      expect( foo1, '1' ).to.be.true;
+      expect( foo2, '2' ).to.be.true;
+    });
+
+    it('should not trigger extra on re-add', function(){
+      var n = cy.nodes()[0];
+      var cb;
+      var i = 0;
+      var removed = false;
+
+      n.on('foo', cb = function(){
+        i++;
+
+        if( !removed ){
+          removed = true;
+          n.off('foo', cb);
+          n.on('foo', cb);
+          n.trigger('foo');
+        }
+      });
+
+      n.trigger('foo');
+
+      expect(i).to.equal(2);
+    });
+
+    it('should not trigger extra on re-add x3', function(){
+      var n = cy.nodes()[0];
+      var cb;
+      var i = 0;
+      var removed = false;
+      var pre = 0;
+      var post = 0;
+
+      n.on('foo', function(){
+        pre++;
+      });
+
+      n.on('foo', cb = function(){
+        i++;
+
+        if( !removed ){
+          removed = true;
+          n.off('foo', cb);
+          n.on('foo', cb);
+          n.trigger('foo');
+        }
+      });
+
+      n.on('foo', function(){
+        post++;
+      });
+
+      n.trigger('foo');
+
+      expect(i, 'i').to.equal(2);
+      expect(pre, 'pre').to.equal(2);
+      expect(post, 'post').to.equal(2);
+    });
+
   });
 
   describe('eles.trigger()', function(){
 
     var triggers = 0;
     var n1;
-    var handler = function(){ triggers++; }
+    var handler = function(){ triggers++; };
 
     beforeEach(function(){
       triggers = 0;
@@ -808,6 +1088,22 @@ describe('Events', function(){
 
       setTimeout(function(){
         expect( trigs ).to.equal(1);
+        next();
+      }, 50);
+    });
+
+    it('removed event promise does not prevent next handler', function( next ){
+      var n = cy.nodes()[0];
+      var count = 0;
+      var inc = function(){ ++count; };
+
+      n.pon('foo').then( inc );
+      n.pon('foo').then( inc );
+
+      n.trigger('foo');
+
+      setTimeout(function(){
+        expect( count ).to.equal(2);
         next();
       }, 50);
     });

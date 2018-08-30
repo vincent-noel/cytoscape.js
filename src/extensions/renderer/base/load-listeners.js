@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require( '../../../is' );
 var util = require( '../../../util' );
 var math = require( '../../../math' );
@@ -92,8 +90,7 @@ BRp.load = function(){
     for( var i = 0; i < names.length; i++ ){
       var name = names[ i ];
 
-      var event = new Event( e, util.extend( { type: name }, props ) );
-      target.trigger( event );
+      target.emit( util.extend( { originalEvent: e, type: name }, props ) );
     }
   };
 
@@ -326,25 +323,23 @@ BRp.load = function(){
   // auto resize
   r.registerBinding( window, 'resize', onResize ); // eslint-disable-line no-undef
 
-  var invalCtnrBBOnScroll = function( domEle ){
-    r.registerBinding( domEle, 'scroll', function( e ){
-      r.invalidateContainerClientCoordsCache();
-    } );
+  var forEachUp = function( domEle, fn ){
+    while( domEle != null ){
+      fn( domEle );
+
+      domEle = domEle.parentNode
+    }
   };
 
-  var bbCtnr = r.cy.container();
+  var invalidateCoords = function(){
+    r.invalidateContainerClientCoordsCache();
+  };
 
-  for( ;; ){
-
-    invalCtnrBBOnScroll( bbCtnr );
-
-    if( bbCtnr.parentNode ){
-      bbCtnr = bbCtnr.parentNode;
-    } else {
-      break;
-    }
-
-  }
+  forEachUp( r.container, function( domEle ){
+    r.registerBinding( domEle, 'transitionend', invalidateCoords );
+    r.registerBinding( domEle, 'animationend', invalidateCoords );
+    r.registerBinding( domEle, 'scroll', invalidateCoords );
+  } );
 
   // stop right click menu from appearing on cy
   r.registerBinding( r.container, 'contextmenu', function( e ){
@@ -430,15 +425,17 @@ BRp.load = function(){
           var ele = r.hoverData.down;
 
           if( ele ){
-            ele.trigger( new Event( e, {
+            ele.emit( {
+              originalEvent: e,
               type: 'taphold',
               position: { x: pos[0], y: pos[1] }
-            } ) );
+            } );
           } else {
-            cy.trigger( new Event( e, {
+            cy.emit( {
+              originalEvent: e,
               type: 'taphold',
               position: { x: pos[0], y: pos[1] }
-            } ) );
+            } );
           }
         }
 
@@ -450,18 +447,19 @@ BRp.load = function(){
 
       r.hoverData.cxtStarted = true;
 
-      var cxtEvt = new Event( e, {
+      var cxtEvt = {
+        originalEvent: e,
         type: 'cxttapstart',
         position: { x: pos[0], y: pos[1] }
-      } );
+      };
 
       if( near ){
         near.activate();
-        near.trigger( cxtEvt );
+        near.emit( cxtEvt );
 
         r.hoverData.down = near;
       } else {
-        cy.trigger( cxtEvt );
+        cy.emit( cxtEvt );
       }
 
       r.hoverData.downTime = (new Date()).getTime();
@@ -482,14 +480,15 @@ BRp.load = function(){
           if( r.nodeIsGrabbable( near ) ){
 
             var makeEvent = function( type ){
-              return new Event( e, {
+              return {
+                originalEvent: e,
                 type: type,
                 position: { x: pos[0], y: pos[1] }
-              } );
+              };
             };
 
             var triggerGrab = function( ele ){
-              ele.trigger( makeEvent('grab') );
+              ele.emit( makeEvent('grab') );
             };
 
             setGrabTarget( near );
@@ -499,7 +498,7 @@ BRp.load = function(){
               draggedElements = r.dragData.possibleDragElements = [];
               addNodeToDrag( near, { addToList: draggedElements } );
 
-              near.trigger( makeEvent('grabon') ).trigger( makeEvent('grab') );
+              near.emit( makeEvent('grabon') ).emit( makeEvent('grab') );
 
             } else {
               draggedElements = r.dragData.possibleDragElements = [  ];
@@ -508,7 +507,7 @@ BRp.load = function(){
 
               addNodesToDrag( selectedNodes, { addToList: draggedElements } );
 
-              near.trigger( makeEvent('grabon') );
+              near.emit( makeEvent('grabon') );
 
               selectedNodes.forEach( triggerGrab );
             }
@@ -620,7 +619,7 @@ BRp.load = function(){
       r.data.bgActivePosistion = undefined;
 
       if( !r.hoverData.selecting ){
-        cy.trigger('boxstart');
+        cy.emit('boxstart');
       }
 
       select[4] = 1;
@@ -634,15 +633,16 @@ BRp.load = function(){
     if( r.hoverData.which === 3 ){
       // but only if over threshold
       if( isOverThresholdDrag ){
-        var cxtEvt = new Event( e, {
+        var cxtEvt = ( {
+          originalEvent: e,
           type: 'cxtdrag',
           position: { x: pos[0], y: pos[1] }
         } );
 
         if( down ){
-          down.trigger( cxtEvt );
+          down.emit( cxtEvt );
         } else {
-          cy.trigger( cxtEvt );
+          cy.emit( cxtEvt );
         }
 
         r.hoverData.cxtDragged = true;
@@ -650,7 +650,8 @@ BRp.load = function(){
         if( !r.hoverData.cxtOver || near !== r.hoverData.cxtOver ){
 
           if( r.hoverData.cxtOver ){
-            r.hoverData.cxtOver.trigger( new Event( e, {
+            r.hoverData.cxtOver.emit( ( {
+              originalEvent: e,
               type: 'cxtdragout',
               position: { x: pos[0], y: pos[1] }
             } ) );
@@ -659,7 +660,8 @@ BRp.load = function(){
           r.hoverData.cxtOver = near;
 
           if( near ){
-            near.trigger( new Event( e, {
+            near.emit( ( {
+              originalEvent: e,
               type: 'cxtdragover',
               position: { x: pos[0], y: pos[1] }
             } ) );
@@ -750,7 +752,7 @@ BRp.load = function(){
         r.hoverData.last = near;
       }
 
-      if( down && r.nodeIsDraggable( down ) ){
+      if( down ){
 
         if( isOverThresholdDrag ){ // then we can take action
 
@@ -758,12 +760,12 @@ BRp.load = function(){
             if( down && down.grabbed() ){
               freeDraggedElements( draggedElements );
 
-              down.trigger('free');
+              down.emit('free');
             }
 
             goIntoBoxMode();
 
-          } else { // otherwise drag
+          } else if( down && down.grabbed() && r.nodeIsDraggable( down ) ){ // drag node
             var justStartedDrag = !r.dragData.didDrag;
 
             if( justStartedDrag ){
@@ -789,17 +791,13 @@ BRp.load = function(){
                 toTrigger.push( dEle );
 
                 if( is.number( disp[0] ) && is.number( disp[1] ) ){
-                  var updatePos = !dEle.isParent();
-
-                  if( updatePos ){
-                    dPos.x += disp[0];
-                    dPos.y += disp[1];
-                  }
+                  dPos.x += disp[0];
+                  dPos.y += disp[1];
 
                   if( justStartedDrag ){
                     var dragDelta = r.hoverData.dragDelta;
 
-                    if( updatePos && dragDelta && is.number( dragDelta[0] ) && is.number( dragDelta[1] ) ){
+                    if( dragDelta && is.number( dragDelta[0] ) && is.number( dragDelta[1] ) ){
                       dPos.x += dragDelta[0];
                       dPos.y += dragDelta[1];
                     }
@@ -814,7 +812,7 @@ BRp.load = function(){
             var tcol = cy.collection( toTrigger );
 
             tcol.dirtyCompoundBoundsCache();
-            tcol.trigger( 'position drag' );
+            tcol.emit( 'position drag' );
 
             r.redrawHint( 'drag', true );
             r.redraw();
@@ -862,27 +860,29 @@ BRp.load = function(){
     }
 
     if( r.hoverData.which === 3 ){
-      var cxtEvt = new Event( e, {
+      var cxtEvt = ( {
+        originalEvent: e,
         type: 'cxttapend',
         position: { x: pos[0], y: pos[1] }
       } );
 
       if( down ){
-        down.trigger( cxtEvt );
+        down.emit( cxtEvt );
       } else {
-        cy.trigger( cxtEvt );
+        cy.emit( cxtEvt );
       }
 
       if( !r.hoverData.cxtDragged ){
-        var cxtTap = new Event( e, {
+        var cxtTap = ( {
+          originalEvent: e,
           type: 'cxttap',
           position: { x: pos[0], y: pos[1] }
         } );
 
         if( down ){
-          down.trigger( cxtTap );
+          down.emit( cxtTap );
         } else {
-          cy.trigger( cxtTap );
+          cy.emit( cxtTap );
         }
       }
 
@@ -955,16 +955,16 @@ BRp.load = function(){
           r.redrawHint( 'eles', true );
         }
 
-        cy.trigger('boxend');
+        cy.emit('boxend');
 
         var eleWouldBeSelected = function( ele ){ return ele.selectable() && !ele.selected(); };
 
         if( cy.selectionType() === 'additive' ){
           box
-            .trigger('box')
+            .emit('box')
             .stdFilter( eleWouldBeSelected )
               .select()
-              .trigger('boxselect')
+              .emit('boxselect')
           ;
         } else {
           if( !multSelKeyDown ){
@@ -972,10 +972,10 @@ BRp.load = function(){
           }
 
           box
-            .trigger('box')
+            .emit('box')
             .stdFilter( eleWouldBeSelected )
               .select()
-              .trigger('boxselect')
+              .emit('boxselect')
           ;
         }
 
@@ -1002,7 +1002,7 @@ BRp.load = function(){
 
         freeDraggedElements( draggedElements );
 
-        if( downWasGrabbed ){ down.trigger('free'); }
+        if( downWasGrabbed ){ down.emit('free'); }
       }
 
     } // else not right mouse
@@ -1096,7 +1096,8 @@ BRp.load = function(){
   r.registerBinding( r.container, 'mouseout', function mouseOutHandler( e ){
     var pos = r.projectIntoViewport( e.clientX, e.clientY );
 
-    r.cy.trigger( new Event( e, {
+    r.cy.emit( ( {
+      originalEvent: e,
       type: 'mouseout',
       position: { x: pos[0], y: pos[1] }
     } ) );
@@ -1105,7 +1106,8 @@ BRp.load = function(){
   r.registerBinding( r.container, 'mouseover', function mouseOverHandler( e ){
     var pos = r.projectIntoViewport( e.clientX, e.clientY );
 
-    r.cy.trigger( new Event( e, {
+    r.cy.emit( ( {
+      originalEvent: e,
       type: 'mouseover',
       position: { x: pos[0], y: pos[1] }
     } ) );
@@ -1185,21 +1187,24 @@ BRp.load = function(){
         var near2 = r.findNearestElement( now[2], now[3], true, true );
 
         if( near1 && near1.isNode() ){
-          near1.activate().trigger( new Event( e, {
+          near1.activate().emit( ( {
+            originalEvent: e,
             type: 'cxttapstart',
             position: { x: now[0], y: now[1] }
           } ) );
           r.touchData.start = near1;
 
         } else if( near2 && near2.isNode() ){
-          near2.activate().trigger( new Event( e, {
+          near2.activate().emit( ( {
+            originalEvent: e,
             type: 'cxttapstart',
             position: { x: now[0], y: now[1] }
           } ) );
           r.touchData.start = near2;
 
         } else {
-          cy.trigger( new Event( e, {
+          cy.emit( ( {
+            originalEvent: e,
             type: 'cxttapstart',
             position: { x: now[0], y: now[1] }
           } ) );
@@ -1254,18 +1259,19 @@ BRp.load = function(){
           setGrabTarget( near );
 
           var makeEvent = function( type ){
-            return new Event( e, {
+            return ( {
+              originalEvent: e,
               type: type,
               position: { x: now[0], y: now[1] }
             } );
           };
 
-          near.trigger( makeEvent('grabon') )
+          near.emit( makeEvent('grabon') )
 
           if( selectedNodes ){
-            selectedNodes.forEach(function( n ){ n.trigger( makeEvent('grab') ); });
+            selectedNodes.forEach(function( n ){ n.emit( makeEvent('grab') ); });
           } else {
-            near.trigger( makeEvent('grab') );
+            near.emit( makeEvent('grab') );
           }
         }
       }
@@ -1377,7 +1383,8 @@ BRp.load = function(){
 
         r.redrawHint( 'select', true );
 
-        var cxtEvt = new Event( e, {
+        var cxtEvt = ( {
+          originalEvent: e,
           type: 'cxttapend',
           position: { x: now[0], y: now[1] }
         } );
@@ -1385,12 +1392,12 @@ BRp.load = function(){
         if( r.touchData.start ){
           r.touchData.start
             .unactivate()
-            .trigger( cxtEvt )
+            .emit( cxtEvt )
           ;
 
           r.touchData.start = null;
         } else {
-          cy.trigger( cxtEvt );
+          cy.emit( cxtEvt );
         }
       }
 
@@ -1398,7 +1405,8 @@ BRp.load = function(){
 
     // context swipe
     if( capture && r.touchData.cxt ){
-      var cxtEvt = new Event( e, {
+      var cxtEvt = ( {
+        originalEvent: e,
         type: 'cxtdrag',
         position: { x: now[0], y: now[1] }
       } );
@@ -1406,9 +1414,9 @@ BRp.load = function(){
       r.redrawHint( 'select', true );
 
       if( r.touchData.start ){
-        r.touchData.start.trigger( cxtEvt );
+        r.touchData.start.emit( cxtEvt );
       } else {
-        cy.trigger( cxtEvt );
+        cy.emit( cxtEvt );
       }
 
       if( r.touchData.start ){ r.touchData.start._private.grabbed = false; }
@@ -1419,7 +1427,8 @@ BRp.load = function(){
       if( !r.touchData.cxtOver || near !== r.touchData.cxtOver ){
 
         if( r.touchData.cxtOver ){
-          r.touchData.cxtOver.trigger( new Event( e, {
+          r.touchData.cxtOver.emit( ( {
+            originalEvent: e,
             type: 'cxtdragout',
             position: { x: now[0], y: now[1] }
           } ) );
@@ -1428,7 +1437,8 @@ BRp.load = function(){
         r.touchData.cxtOver = near;
 
         if( near ){
-          near.trigger( new Event( e, {
+          near.emit( ( {
+            originalEvent: e,
             type: 'cxtdragover',
             position: { x: now[0], y: now[1] }
           } ) );
@@ -1446,7 +1456,7 @@ BRp.load = function(){
       this.lastThreeTouch = +new Date();
 
       if( !r.touchData.selecting ){
-        cy.trigger('boxstart');
+        cy.emit('boxstart');
       }
 
       r.touchData.selecting = true;
@@ -1544,7 +1554,7 @@ BRp.load = function(){
 
           r.touchData.start
             .unactivate()
-            .trigger( 'free' )
+            .emit( 'free' )
           ;
         }
 
@@ -1598,9 +1608,8 @@ BRp.load = function(){
             if( r.nodeIsDraggable( draggedEle ) && draggedEle.grabbed() ){
               r.dragData.didDrag = true;
               var dPos = draggedEle.position();
-              var updatePos = !draggedEle.isParent();
 
-              if( updatePos && is.number( disp[0] ) && is.number( disp[1] ) ){
+              if( is.number( disp[0] ) && is.number( disp[1] ) ){
                 dPos.x += disp[0];
                 dPos.y += disp[1];
               }
@@ -1610,7 +1619,7 @@ BRp.load = function(){
 
                 var dragDelta = r.touchData.dragDelta;
 
-                if( updatePos && dragDelta && is.number( dragDelta[0] ) && is.number( dragDelta[1] ) ){
+                if( dragDelta && is.number( dragDelta[0] ) && is.number( dragDelta[1] ) ){
                   dPos.x += dragDelta[0];
                   dPos.y += dragDelta[1];
                 }
@@ -1622,7 +1631,7 @@ BRp.load = function(){
           var tcol = cy.collection( draggedEles );
 
           tcol.dirtyCompoundBoundsCache();
-          tcol.trigger( 'position drag' );
+          tcol.emit( 'position drag' );
 
           r.hoverData.draggingEles = true;
 
@@ -1657,8 +1666,8 @@ BRp.load = function(){
         } );
 
         if( ( !start || !start.grabbed() ) && near != last ){
-          if( last ){ last.trigger( new Event( e, { type: 'tapdragout', position: { x: now[0], y: now[1] } } ) ); }
-          if( near ){ near.trigger( new Event( e, { type: 'tapdragover', position: { x: now[0], y: now[1] } } ) ); }
+          if( last ){ last.emit( ( { originalEvent: e, type: 'tapdragout', position: { x: now[0], y: now[1] } } ) ); }
+          if( near ){ near.emit( ( { originalEvent: e, type: 'tapdragover', position: { x: now[0], y: now[1] } } ) ); }
         }
 
         r.touchData.last = near;
@@ -1726,8 +1735,14 @@ BRp.load = function(){
     for( var j = 0; j < now.length; j++ ){ earlier[ j ] = now[ j ]; }
     //r.redraw();
 
-  }, false );
+    // the active bg indicator should be removed when making a swipe that is neither for dragging nodes or panning
+    if( capture && e.touches.length > 0 && !r.hoverData.draggingEles && !r.swipePanning && r.data.bgActivePosistion != null ){
+      r.data.bgActivePosistion = undefined;
+      r.redrawHint( 'select', true );
+      r.redraw();
+    }
 
+  }, false );
   var touchcancelHandler;
   r.registerBinding( window, 'touchcancel', touchcancelHandler = function( e ){ // eslint-disable-line no-undef
     var start = r.touchData.start;
@@ -1746,7 +1761,9 @@ BRp.load = function(){
     var capture = r.touchData.capture;
 
     if( capture ){
-      r.touchData.capture = false;
+      if( e.touches.length === 0 ){
+        r.touchData.capture = false;
+      }
 
       e.preventDefault();
     } else {
@@ -1773,27 +1790,29 @@ BRp.load = function(){
 
     var ctxTapend;
     if( r.touchData.cxt ){
-      ctxTapend = new Event( e, {
+      ctxTapend = ( {
+        originalEvent: e,
         type: 'cxttapend',
         position: { x: now[0], y: now[1] }
       } );
 
       if( start ){
-        start.trigger( ctxTapend );
+        start.emit( ctxTapend );
       } else {
-        cy.trigger( ctxTapend );
+        cy.emit( ctxTapend );
       }
 
       if( !r.touchData.cxtDragged ){
-        var ctxTap = new Event( e, {
+        var ctxTap = ( {
+          originalEvent: e,
           type: 'cxttap',
           position: { x: now[0], y: now[1] }
         } );
 
         if( start ){
-          start.trigger( ctxTap );
+          start.emit( ctxTap );
         } else {
-          cy.trigger( ctxTap );
+          cy.emit( ctxTap );
         }
 
       }
@@ -1820,15 +1839,15 @@ BRp.load = function(){
 
       r.redrawHint( 'select', true );
 
-      cy.trigger('boxend');
+      cy.emit('boxend');
 
       var eleWouldBeSelected = function( ele ){ return ele.selectable() && !ele.selected(); };
 
       box
-        .trigger('box')
+        .emit('box')
         .stdFilter( eleWouldBeSelected )
           .select()
-          .trigger('boxselect')
+          .emit('boxselect')
       ;
 
       if( box.nonempty() ){
@@ -1868,7 +1887,7 @@ BRp.load = function(){
         r.redrawHint( 'eles', true );
 
         if( startWasGrabbed ){
-          start.trigger( 'free' );
+          start.emit( 'free' );
         }
 
         triggerEvents( start, [ 'touchend', 'tapend', 'vmouseup', 'tapdragout' ], e, {
@@ -2005,8 +2024,12 @@ BRp.load = function(){
       } );
     };
 
+    var pointerIsMouse = function( e ){
+      return e.pointerType === 'mouse' || e.pointerType === 4;
+    };
+
     r.registerBinding( r.container, 'pointerdown', function( e ){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       e.preventDefault();
 
@@ -2017,7 +2040,7 @@ BRp.load = function(){
     } );
 
     r.registerBinding( r.container, 'pointerup', function( e ){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       removePointer( e );
 
@@ -2026,7 +2049,7 @@ BRp.load = function(){
     } );
 
     r.registerBinding( r.container, 'pointercancel', function( e ){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       removePointer( e );
 
@@ -2035,7 +2058,7 @@ BRp.load = function(){
     } );
 
     r.registerBinding( r.container, 'pointermove', function( e ){
-      if( e.pointerType === 'mouse' ){ return; } // mouse already handled
+      if( pointerIsMouse(e) ){ return; } // mouse already handled
 
       e.preventDefault();
 

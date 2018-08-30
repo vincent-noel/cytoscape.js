@@ -2,13 +2,15 @@
     "env": {
         "commonjs": true,
         "shared-node-browser": true,
+        "node": true,
         "mocha": true
     },
     "parserOptions": {
-      "ecmaVersion": 5
+      "ecmaVersion": 6
     },
     "extends": "eslint:recommended",
     "rules": {
-      "no-redeclare": "off"
+      "no-redeclare": "off",
+      "semi": "error"
     }
 }

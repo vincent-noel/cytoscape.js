@@ -1,7 +1,4 @@
-'use strict';
-
 var math = require('../../../math');
-var util = require('../../../util');
 var sbgn = require( '../../../sbgn' );
 
 var BRp = {};
@@ -59,13 +56,7 @@ BRp.generateEllipse = function(){
     },
 
     checkPoint: function( x, y, padding, width, height, centerX, centerY ){
-      x -= centerX;
-      y -= centerY;
-
-      x /= (width / 2 + padding);
-      y /= (height / 2 + padding);
-
-      return x * x + y * y <= 1;
+      return math.checkInEllipse( x, y, width, height, centerX, centerY, padding );
     }
   } );
 };
@@ -92,67 +83,60 @@ BRp.generateRoundRectangle = function(){
       ;
     },
 
-    // Looks like the width passed into this function is actually the total width / 2
     checkPoint: function(
       x, y, padding, width, height, centerX, centerY ){
 
       var cornerRadius = math.getRoundRectangleRadius( width, height );
+      var diam = cornerRadius * 2;
 
       // Check hBox
       if( math.pointInsidePolygon( x, y, this.points,
-        centerX, centerY, width, height - 2 * cornerRadius, [0, -1], padding ) ){
+        centerX, centerY, width, height - diam, [0, -1], padding ) ){
         return true;
       }
 
       // Check vBox
       if( math.pointInsidePolygon( x, y, this.points,
-        centerX, centerY, width - 2 * cornerRadius, height, [0, -1], padding ) ){
+        centerX, centerY, width - diam, height, [0, -1], padding ) ){
         return true;
       }
 
-      var checkInEllipse = function( x, y, centerX, centerY, width, height, padding ){
-        x -= centerX;
-        y -= centerY;
-
-        x /= (width / 2 + padding);
-        y /= (height / 2 + padding);
-
-        return (x * x + y * y <= 1);
-      };
-
-
       // Check top left quarter circle
-      if( checkInEllipse( x, y,
+      if( math.checkInEllipse( x, y,
+        diam, diam,
         centerX - width / 2 + cornerRadius,
         centerY - height / 2 + cornerRadius,
-        cornerRadius * 2, cornerRadius * 2, padding ) ){
+        padding ) ){
 
         return true;
       }
 
       // Check top right quarter circle
-      if( checkInEllipse( x, y,
+      if( math.checkInEllipse( x, y,
+        diam, diam,
         centerX + width / 2 - cornerRadius,
         centerY - height / 2 + cornerRadius,
-        cornerRadius * 2, cornerRadius * 2, padding ) ){
+        padding ) ){
 
         return true;
       }
 
       // Check bottom right quarter circle
-      if( checkInEllipse( x, y,
+      if( math.checkInEllipse( x, y,
+        diam, diam,
         centerX + width / 2 - cornerRadius,
         centerY + height / 2 - cornerRadius,
-        cornerRadius * 2, cornerRadius * 2, padding ) ){
+        padding ) ){
 
         return true;
       }
 
       // Check bottom left quarter circle
-      if( checkInEllipse( x, y,
+      if( math.checkInEllipse( x, y,
+        diam, diam,
         centerX - width / 2 + cornerRadius,
         centerY + height / 2 - cornerRadius,
-        cornerRadius * 2, cornerRadius * 2, padding ) ){
+        padding ) ){
 
         return true;
       }
@@ -226,6 +210,245 @@ BRp.generateCutRectangle = function(){
   } );
 };
 
+BRp.generateBarrel = function(){
+  return ( this.nodeShapes['barrel'] = {
+    renderer: this,
+
+    name: 'barrel',
+
+    points: math.generateUnitNgonPointsFitToSquare( 4, 0 ),
+
+    draw: function( context, centerX, centerY, width, height ){
+      this.renderer.nodeShapeImpl( this.name, context, centerX, centerY, width, height );
+    },
+
+    intersectLine: function( nodeX, nodeY, width, height, x, y, padding ){
+      // use two fixed t values for the bezier curve approximation
+
+      var t0 = 0.15;
+      var t1 = 0.5;
+      var t2 = 0.85;
+
+      var bPts = this.generateBarrelBezierPts( width + 2*padding, height + 2*padding, nodeX, nodeY );
+
+      var approximateBarrelCurvePts = pts => {
+        // approximate curve pts based on the two t values
+        var m0 = math.qbezierPtAt({x: pts[0], y: pts[1]}, {x: pts[2], y: pts[3]}, {x: pts[4], y: pts[5]}, t0);
+        var m1 = math.qbezierPtAt({x: pts[0], y: pts[1]}, {x: pts[2], y: pts[3]}, {x: pts[4], y: pts[5]}, t1);
+        var m2 = math.qbezierPtAt({x: pts[0], y: pts[1]}, {x: pts[2], y: pts[3]}, {x: pts[4], y: pts[5]}, t2);
+
+        return [
+          pts[0],pts[1],
+          m0.x, m0.y,
+          m1.x, m1.y,
+          m2.x, m2.y,
+          pts[4], pts[5]
+        ];
+      };
+
+      var pts = [].concat(
+        approximateBarrelCurvePts(bPts.topLeft),
+        approximateBarrelCurvePts(bPts.topRight),
+        approximateBarrelCurvePts(bPts.bottomRight),
+        approximateBarrelCurvePts(bPts.bottomLeft)
+      );
+
+      return math.polygonIntersectLine( x, y, pts, nodeX, nodeY );
+    },
+
+    generateBarrelBezierPts: function( width, height, centerX, centerY ){
+      var hh = height / 2;
+      var hw = width / 2;
+      var xBegin = centerX - hw;
+      var xEnd = centerX + hw;
+      var yBegin = centerY - hh;
+      var yEnd = centerY + hh;
+
+      var curveConstants = math.getBarrelCurveConstants( width, height );
+      var hOffset = curveConstants.heightOffset;
+      var wOffset = curveConstants.widthOffset;
+      var ctrlPtXOffset = curveConstants.ctrlPtOffsetPct * width;
+
+      // points are in clockwise order, inner (imaginary) control pt on [4, 5]
+      var pts = {
+        topLeft: [ xBegin, yBegin + hOffset, xBegin + ctrlPtXOffset, yBegin, xBegin + wOffset, yBegin ],
+        topRight: [ xEnd - wOffset, yBegin, xEnd - ctrlPtXOffset, yBegin, xEnd, yBegin + hOffset ],
+        bottomRight: [ xEnd, yEnd - hOffset, xEnd - ctrlPtXOffset, yEnd, xEnd - wOffset, yEnd ],
+        bottomLeft: [ xBegin + wOffset, yEnd, xBegin + ctrlPtXOffset, yEnd, xBegin, yEnd - hOffset ]
+      };
+
+      pts.topLeft.isTop = true;
+      pts.topRight.isTop = true;
+      pts.bottomLeft.isBottom = true;
+      pts.bottomRight.isBottom = true;
+
+      return pts;
+    },
+
+    checkPoint: function(
+      x, y, padding, width, height, centerX, centerY ){
+
+      var curveConstants = math.getBarrelCurveConstants( width, height );
+      var hOffset = curveConstants.heightOffset;
+      var wOffset = curveConstants.widthOffset;
+
+      // Check hBox
+      if( math.pointInsidePolygon( x, y, this.points,
+        centerX, centerY, width, height - 2 *  hOffset, [0, -1], padding ) ){
+        return true;
+      }
+
+      // Check vBox
+      if( math.pointInsidePolygon( x, y, this.points,
+        centerX, centerY, width - 2 * wOffset, height, [0, -1], padding ) ){
+        return true;
+      }
+
+      var barrelCurvePts = this.generateBarrelBezierPts( width, height, centerX, centerY );
+
+      var getCurveT = function (x, y, curvePts) {
+        var x0 = curvePts[ 4 ];
+        var x1 = curvePts[ 2 ];
+        var x2 = curvePts[ 0 ];
+        var y0 = curvePts[ 5 ];
+        // var y1 = curvePts[ 3 ];
+        var y2 = curvePts[ 1 ];
+
+        var xMin = Math.min( x0, x2 );
+        var xMax = Math.max( x0, x2 );
+        var yMin = Math.min( y0, y2 );
+        var yMax = Math.max( y0, y2 );
+
+        if( xMin <= x && x <= xMax  && yMin <= y && y <= yMax ){
+          var coeff = math.bezierPtsToQuadCoeff( x0, x1, x2 );
+          var roots = math.solveQuadratic( coeff[0], coeff[1], coeff[2], x );
+
+          var validRoots = roots.filter(function( r ){
+            return 0 <= r && r <= 1;
+          });
+
+          if( validRoots.length > 0 ){
+            return validRoots[ 0 ];
+          }
+        }
+        return null;
+      };
+
+      var curveRegions = Object.keys( barrelCurvePts );
+      for( var i = 0; i < curveRegions.length; i++ ){
+        var corner = curveRegions[ i ];
+        var cornerPts = barrelCurvePts[ corner ];
+        var t = getCurveT( x, y, cornerPts );
+
+        if( t == null ){ continue; }
+
+        var y0 = cornerPts[ 5 ];
+        var y1 = cornerPts[ 3 ];
+        var y2 = cornerPts[ 1 ];
+        var bezY = math.qbezierAt( y0, y1, y2, t );
+
+        if( cornerPts.isTop && bezY <= y ){
+          return true;
+        }
+        if( cornerPts.isBottom && y <= bezY ){
+          return true;
+        }
+      }
+      return false;
+    }
+  } );
+};
+
+BRp.generateBottomRoundrectangle = function(){
+  return ( this.nodeShapes['bottomroundrectangle'] = {
+    renderer: this,
+
+    name: 'bottomroundrectangle',
+
+    points: math.generateUnitNgonPointsFitToSquare( 4, 0 ),
+
+    draw: function( context, centerX, centerY, width, height ){
+      this.renderer.nodeShapeImpl( this.name, context, centerX, centerY, width, height );
+    },
+
+    intersectLine: function( nodeX, nodeY, width, height, x, y, padding ){
+      var topStartX = nodeX - ( width / 2 + padding );
+      var topStartY = nodeY - ( height / 2 + padding );
+      var topEndY = topStartY;
+      var topEndX = nodeX + ( width / 2 + padding );
+
+      var topIntersections = math.finiteLinesIntersect(
+        x, y, nodeX, nodeY, topStartX, topStartY, topEndX, topEndY, false );
+      if( topIntersections.length > 0 ){
+        return topIntersections;
+      }
+
+      return math.roundRectangleIntersectLine(
+        x, y,
+        nodeX,
+        nodeY,
+        width, height,
+        padding )
+      ;
+    },
+
+    checkPoint: function(
+      x, y, padding, width, height, centerX, centerY ){
+
+      var cornerRadius = math.getRoundRectangleRadius( width, height );
+      var diam = 2 * cornerRadius;
+
+      // Check hBox
+      if( math.pointInsidePolygon( x, y, this.points,
+        centerX, centerY, width, height - diam, [0, -1], padding ) ){
+        return true;
+      }
+
+      // Check vBox
+      if( math.pointInsidePolygon( x, y, this.points,
+        centerX, centerY, width - diam, height, [0, -1], padding ) ){
+        return true;
+      }
+
+      // check non-rounded top side
+      var outerWidth = ( ( width / 2 ) + 2 * padding );
+      var outerHeight = ( ( height / 2 ) + 2 * padding );
+      var points = [
+        centerX - outerWidth, centerY - outerHeight,
+        centerX - outerWidth, centerY,
+        centerX + outerWidth, centerY,
+        centerX + outerWidth, centerY - outerHeight
+      ];
+      if( math.pointInsidePolygonPoints( x, y, points) ){
+        return true;
+      }
+
+      // Check bottom right quarter circle
+      if( math.checkInEllipse( x, y,
+        diam, diam,
+        centerX + width / 2 - cornerRadius,
+        centerY + height / 2 - cornerRadius,
+        padding ) ){
+
+        return true;
+      }
+
+      // Check bottom left quarter circle
+      if( math.checkInEllipse( x, y,
+        diam, diam,
+        centerX - width / 2 + cornerRadius,
+        centerY + height / 2 - cornerRadius,
+        padding ) ){
+
+        return true;
+      }
+
+      return false;
+    }
+  } );
+};
+
+
 BRp.registerNodeShapes = function(){
   var nodeShapes = this.nodeShapes = BRp.nodeShapes;
   var renderer = this;
@@ -240,6 +463,10 @@ BRp.registerNodeShapes = function(){
   this.generateRoundRectangle();
 
   this.generateCutRectangle();
+
+  this.generateBarrel();
+
+  this.generateBottomRoundrectangle();
 
   this.generatePolygon( 'diamond', [
     0, 1,
@@ -297,6 +524,23 @@ BRp.registerNodeShapes = function(){
     -0.333, 1
   ] );
 
+  this.generatePolygon( 'concavehexagon', [
+    -1, -0.95,
+    -0.75, 0,
+    -1, 0.95,
+    1, 0.95,
+    0.75, 0,
+    1, -0.95
+  ] );
+
+  this.generatePolygon( 'tag', [
+    -1, -1,
+    0.25, -1,
+    1, 0,
+    0.25,1,
+    -1, 1
+  ]);
+
   nodeShapes.makePolygon = function( points ){
 
     // use caching on user-specified polygons so they are as fast as native shapes
@@ -312,7 +556,7 @@ BRp.registerNodeShapes = function(){
     // create and cache new shape
     return renderer.generatePolygon( name, points );
   };
-  
+
   sbgn.registerSbgnNodeShapes();
 };
 
