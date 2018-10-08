@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  *  Elements are drawn in a specific order based on compound depth (low to high), the element type (nodes above edges),
  *  and z-index (low to high).  These styles affect how this applies:
@@ -12,43 +10,45 @@
  *  z-index: An integer value that affects the relative draw order of elements.  In general, an element with a higher
  *      `z-index` will be drawn on top of an element with a lower `z-index`.
  */
-var zIndexSort = function( a, b ){
-  var cy = a.cy();
-  var hasCompoundNodes = cy.hasCompoundNodes();
+let util = require('../util');
+
+let zIndexSort = function( a, b ){
+  let cy = a.cy();
+  let hasCompoundNodes = cy.hasCompoundNodes();
 
   function getDepth(ele){
-    var style = ele.pstyle( 'z-compound-depth' );
+    let style = ele.pstyle( 'z-compound-depth' );
     if ( style.value === 'auto' ){
-      return hasCompoundNodes ? ele.zDepth() : 0
+      return hasCompoundNodes ? ele.zDepth() : 0;
     } else if ( style.value === 'bottom' ){
-      return -1
+      return -1;
     } else if ( style.value === 'top' ){
-      return Number.MAX_SAFE_INTEGER
+      return util.MAX_INT;
     }
     // 'orphan'
-    return 0
+    return 0;
   }
-  var depthDiff = getDepth(a) - getDepth(b);
+  let depthDiff = getDepth(a) - getDepth(b);
   if ( depthDiff !== 0 ){
-    return depthDiff
+    return depthDiff;
   }
 
   function getEleDepth(ele){
-    var style = ele.pstyle( 'z-index-compare' );
+    let style = ele.pstyle( 'z-index-compare' );
     if ( style.value === 'auto' ){
-      return ele.isNode() ? 1 : 0
+      return ele.isNode() ? 1 : 0;
     }
     // 'manual'
-    return 0
+    return 0;
   }
-  var eleDiff = getEleDepth(a) - getEleDepth(b);
+  let eleDiff = getEleDepth(a) - getEleDepth(b);
   if ( eleDiff !== 0 ){
-    return eleDiff
+    return eleDiff;
   }
 
-  var zDiff = a.pstyle( 'z-index' ).value - b.pstyle( 'z-index' ).value;
+  let zDiff = a.pstyle( 'z-index' ).value - b.pstyle( 'z-index' ).value;
   if ( zDiff !== 0 ){
-    return zDiff
+    return zDiff;
   }
   // compare indices in the core (order added to graph w/ last on top)
   return a.poolIndex() - b.poolIndex();

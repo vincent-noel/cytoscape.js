@@ -1,5 +1,3 @@
-'use strict';
-
 var CRp = {};
 
 var impl;
@@ -40,9 +38,9 @@ CRp.arrowShapeImpl = function( name ){
           context.lineTo( pt.x, pt.y );
         }
 
-//      if( context.closePath ){ context.closePath(); }
-//
-//      if( context.beginPath ){ context.beginPath(); }
+      // if( context.closePath ){ context.closePath(); }
+      //
+      // if( context.beginPath ){ context.beginPath(); }
 
         var teePts = teePoints;
         var firstTeePt = teePoints[0];
@@ -66,20 +64,19 @@ CRp.arrowShapeImpl = function( name ){
           context.lineTo( pt.x, pt.y );
         }
 
-//      if( context.closePath ){ context.closePath(); }
-//
-//
-//      if( context.beginPath ){ context.beginPath(); }
+      // if( context.closePath ){ context.closePath(); }
+      //
+      // if( context.beginPath ){ context.beginPath(); }
 
-      var crossLinePts = crossLinePoints;
-      var firstTeePt = crossLinePoints[0];
-      context.moveTo( firstTeePt.x, firstTeePt.y );
+        var teePts = crossLinePoints;
+        var firstTeePt = crossLinePoints[0];
+        context.moveTo( firstTeePt.x, firstTeePt.y );
 
-      for( var i = 0; i < crossLinePts.length; i++ ){
-        var pt = crossLinePts[ i ];
+        for( var i = 0; i < teePts.length; i++ ){
+          var pt = teePts[ i ];
 
-        context.lineTo( pt.x, pt.y );
-      }
+          context.lineTo( pt.x, pt.y );
+        }
       if( context.closePath ){ context.closePath(); }
     },
 

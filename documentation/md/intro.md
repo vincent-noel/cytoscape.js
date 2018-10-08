@@ -2,11 +2,10 @@
 
  * A fully featured graph library written in pure JS
  * Permissive open source license (MIT)
- * Designed for users first, for both frontfacing app usercases *and* developer usecases
+ * Designed for users first, for both frontfacing app usecases *and* developer usecases
  * Highly optimised
- * Dependency free
  * Compatible with
-  * All modern browsers
+  * All modern browsers (At least ES5 and canvas support are required; feature detection is used for optional performance enhancements)
   * CommonJS/Node.js
   * AMD/Require.js
   * jQuery
@@ -14,6 +13,7 @@
   * Bower
   * Meteor/Atmosphere
   * The [R language](https://www.r-project.org/) via [RCyjs](http://www.bioconductor.org/packages/release/bioc/html/RCyjs.html)
+ * Supports rendering images of graphs on Node.js with [Cytosnap](https://github.com/cytoscape/cytosnap)
  * Has a full suite of unit tests that can be run in the browser or the terminal
  * Documentation includes live code examples, doubling as an interactive requirements specification; example graphs may also be freely modified in your browser's JS console
  * Fully serialisable and deserialisable via JSON
@@ -29,42 +29,50 @@
  * Animatable graph elements and viewport
  * Fully extendable (and extensions can be autoscaffolded for you)
  * Well maintained, with only a sliver of active bug time (i.e. minimised time to bugfix)
+ * Listed by [Zenodo](https://doi.org/10.5281/zenodo.831800) for per-version DOIs
+ * Listed by [OMIC Tools](https://omictools.com/cytoscape-js-tool)
  * Used by
-  * [Abasy Atlas](http://abasy.ccg.unam.mx/)
   * [Active Value Advisors](http://www.activevalue.eu/) : [How-4](http://www.how-4.com/)
   * [Agile Protein Interactomes DataServer](http://apid.dep.usal.es/)
   * [Aras](http://www.aras.com/)
-  * [Avenue](https://avenue-2p0.herokuapp.com/)
+  * [Ben-Gurion University of the Negev](http://bgu.ac.il/)
+   * [DiffNet](http://netbio.bgu.ac.il/diffnet/)
+   * [TissueNet](http://netbio.bgu.ac.il/tissuenet)
   * [BioGRID](http://thebiogrid.org/)
-  * [BS CytoGraph](www.brettjsettle.site/graph)
+  * [BlueSail CRM](https://bluesailcrm.com/)
+  * [Classcraft](https://www.classcraft.com/)
   * [Cray Inc.](http://www.cray.com)
+  * [CyberSift](https://cybersift.io)
   * [CyNetShare](http://cynetshare.ucsd.edu/)
   * [DARPA](http://www.darpa.mil)
+  * [Duo Labs](https://duo.com/labs) : [CloudMapper](https://github.com/duo-labs/cloudmapper)
   * [dSysMap](http://dsysmap.irbbarcelona.org)
   * [Elsevier](https://www.elsevier.com)
   * [Excel](https://products.office.com/en-us/excel) : [GIGRAPH](https://gigraph.io)
   * [Ganister](http://www.ganister.eu/)
+  * [GCHQ](https://www.gchq.gov.uk/) : [Gaffer](https://gchq.github.io/gaffer-doc/)
   * [GeneMANIA](http://genemania.org)
   * [Graphlytic](http://graphlytic.sk/)
   * [ICSI Haystack Project](https://haystack.mobi/panopticon/)
   * [InfoTrack](http://www.infotrack.com.au/)
-  * [The Interactive Metal Genres Graph](https://www.boundbymetal.com/)
-  * [Kartoteka](http://www.kartoteka.ru/vizual/)
+  * [The Kanji Map](http://thekanjimap.com/)
   * [Musicalized](http://en.musicalized.com/full)
-  * [NDex](http://www.ndexbio.org/)
+  * [NDEx](http://www.ndexbio.org/)
   * [OHDSI](http://www.ohdsi.org/)
   * [Pathway Commons](http://www.pathwaycommons.org)
   * [py2cytoscape](https://github.com/idekerlab/py2cytoscape)
   * [Rezza](http://rezza.io)
   * [Sainsbury Laboratory](http://www.tsl.ac.uk/) : [PINet](http://pinet.tsl.ac.uk/)
+  * Southwest Harbor Public Library, Maine : [Digital Archive](http://swhplibrary.net/archive/) : [AvantRelationships](https://github.com/gsoules/AvantRelationships)
   * [Sotera Defense Solutions, Inc.](http://www.soteradefense.com/) : [Graphene](http://sotera.github.io/graphene/)
-  * [Steemit](https://steemit.com/) : [SteemStars](https://steemstars.herokuapp.com/)
+  * [Steemit](https://steemit.com/)
   * [Stringify](https://www.stringify.com/)
   * [Threat Crowd](https://www.threatcrowd.org/)
   * [Trace](https://trace.risingstack.com/)
   * [University of Cambridge](http://www.cam.ac.uk/) : [Intermine](http://intermine.org/)
+  * [University of Leipzig, Institute for Medical Informatics, Statistics and Epidemiology (IMISE)](http://www.imise.uni-leipzig.de/en) : [SNIK research project](http://www.snik.eu/)
+  * [University of Maryland](https://umd.edu/) : [Center for Bioinformatics and Computational Biology](http://cbcb.umd.edu/) : [MetagenomeScope](https://marbl.github.io/MetagenomeScope/)
   * [University of Southern California, San Diego](http://www.ucsd.edu/) : [Visualization of structurally related compounds in Mass Spectrometry with Molecular Networks at GNPS](http://gnps.ucsd.edu/ProteoSAFe/result.jsp?view=network_displayer&componentindex=67&task=c95481f0c53d42e78a61bf899e9f9adb#%7B%7D)
-  * [VentureApp](https://www.ventureapp.com/) : VentureMap (e.g. [Boston](https://www.ventureapp.com/map/boston-tech/), [New York](https://www.ventureapp.com/map/nyc-tech/), [Chicago](https://www.ventureapp.com/map/chicago-tech/))
   * [Virginia Tech](http://www.vt.edu/index.html) [T. M. Murali's Research Group](http://bioinformatics.cs.vt.edu/~murali/) : [GraphSpace](http://graphspace.org)
   * [Visual Interaction GmbH](http://www.mygaze.com/)
 
@@ -95,13 +103,46 @@ The library was created at the [Donnelly Centre](http://thedonnellycentre.utoron
 
 ## Releases
 
+- 3.2
+ - [3.2.16](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.16+is%3Aclosed)
+ - [3.2.15](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.15+is%3Aclosed)
+ - [3.2.14](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.14+is%3Aclosed)
+ - [3.2.13](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.13+is%3Aclosed)
+ - [3.2.12](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.12+is%3Aclosed)
+ - [3.2.11](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.11+is%3Aclosed)
+ - [3.2.10](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.10+is%3Aclosed)
+ - [3.2.9](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.9+is%3Aclosed)
+ - [3.2.8](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.8+is%3Aclosed)
+ - [3.2.7](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.7+is%3Aclosed)
+ - [3.2.6](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.6+is%3Aclosed)
+ - [3.2.5](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.5+is%3Aclosed)
+ - [3.2.4](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.4+is%3Aclosed)
+ - [3.2.3](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.3+is%3Aclosed)
+ - [3.2.2](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.2+is%3Aclosed)
+ - [3.2.1](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.1+is%3Aclosed)
+ - [3.2.0](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.2.0+is%3Aclosed)
 - 3.1
+ - [3.1.5](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.1.5+is%3Aclosed)
+ - [3.1.4](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.1.4+is%3Aclosed)
+ - [3.1.3](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.1.3+is%3Aclosed)
+ - [3.1.2](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.1.2+is%3Aclosed)
  - [3.1.1](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.1.1+is%3Aclosed)
  - [3.1.0](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.1.0+is%3Aclosed)
 - 3.0
  - [3.0.1](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.0.1+is%3Aclosed)
  - [3.0.0](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A3.0.0+is%3Aclosed)
 - 2.7
+ - [2.7.29](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.29+is%3Aclosed)
+ - [2.7.28](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.28+is%3Aclosed)
+ - [2.7.27](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.27+is%3Aclosed)
+ - [2.7.26](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.26+is%3Aclosed)
+ - [2.7.25](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.25+is%3Aclosed)
+ - [2.7.24](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.24+is%3Aclosed)
+ - [2.7.23](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.23+is%3Aclosed)
+ - [2.7.22](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.22+is%3Aclosed)
+ - [2.7.21](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.21+is%3Aclosed)
+ - [2.7.20](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.20+is%3Aclosed)
+ - [2.7.19](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.19+is%3Aclosed)
  - [2.7.18](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.18+is%3Aclosed)
  - [2.7.17](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.17+is%3Aclosed)
  - [2.7.16](https://github.com/cytoscape/cytoscape.js/issues?q=milestone%3A2.7.16+is%3Aclosed)

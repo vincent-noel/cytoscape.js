@@ -1,20 +1,19 @@
-'use strict';
+let Set = require('../set');
 
-var elesfn = ({
+let elesfn = ({
   parent: function( selector ){
-    var parents = [];
-    var cy = this._private.cy;
+    let parents = [];
 
     // optimisation for single ele call
     if( this.length === 1 ){
-      var parent = this[0]._private.parent;
+      let parent = this[0]._private.parent;
 
       if( parent ){ return parent; }
     }
 
-    for( var i = 0; i < this.length; i++ ){
-      var ele = this[ i ];
-      var parent = ele._private.parent;
+    for( let i = 0; i < this.length; i++ ){
+      let ele = this[ i ];
+      let parent = ele._private.parent;
 
       if( parent ){
         parents.push( parent );
@@ -25,12 +24,12 @@ var elesfn = ({
   },
 
   parents: function( selector ){
-    var parents = [];
+    let parents = [];
 
-    var eles = this.parent();
+    let eles = this.parent();
     while( eles.nonempty() ){
-      for( var i = 0; i < eles.length; i++ ){
-        var ele = eles[ i ];
+      for( let i = 0; i < eles.length; i++ ){
+        let ele = eles[ i ];
         parents.push( ele );
       }
 
@@ -41,11 +40,11 @@ var elesfn = ({
   },
 
   commonAncestors: function( selector ){
-    var ancestors;
+    let ancestors;
 
-    for( var i = 0; i < this.length; i++ ){
-      var ele = this[ i ];
-      var parents = ele.parents();
+    for( let i = 0; i < this.length; i++ ){
+      let ele = this[ i ];
+      let parents = ele.parents();
 
       ancestors = ancestors || parents;
 
@@ -68,10 +67,10 @@ var elesfn = ({
   },
 
   children: function( selector ){
-    var children = [];
+    let children = [];
 
-    for( var i = 0; i < this.length; i++ ){
-      var ele = this[ i ];
+    for( let i = 0; i < this.length; i++ ){
+      let ele = this[ i ];
       children = children.concat( ele._private.children );
     }
 
@@ -83,7 +82,7 @@ var elesfn = ({
   },
 
   isParent: function(){
-    var ele = this[0];
+    let ele = this[0];
 
     if( ele ){
       return ele.isNode() && ele._private.children.length !== 0;
@@ -91,7 +90,7 @@ var elesfn = ({
   },
 
   isChildless: function(){
-    var ele = this[0];
+    let ele = this[0];
 
     if( ele ){
       return ele.isNode() && ele._private.children.length === 0;
@@ -99,7 +98,7 @@ var elesfn = ({
   },
 
   isChild: function(){
-    var ele = this[0];
+    let ele = this[0];
 
     if( ele ){
       return ele.isNode() && ele._private.parent != null;
@@ -107,7 +106,7 @@ var elesfn = ({
   },
 
   isOrphan: function(){
-    var ele = this[0];
+    let ele = this[0];
 
     if( ele ){
       return ele.isNode() && ele._private.parent == null;
@@ -115,11 +114,11 @@ var elesfn = ({
   },
 
   descendants: function( selector ){
-    var elements = [];
+    let elements = [];
 
     function add( eles ){
-      for( var i = 0; i < eles.length; i++ ){
-        var ele = eles[ i ];
+      for( let i = 0; i < eles.length; i++ ){
+        let ele = eles[ i ];
 
         elements.push( ele );
 
@@ -134,6 +133,80 @@ var elesfn = ({
     return this.spawn( elements, { unique: true } ).filter( selector );
   }
 });
+
+function forEachCompound( eles, fn, includeSelf, recursiveStep ){
+  let q = [];
+  let did = new Set();
+  let cy = eles.cy();
+  let hasCompounds = cy.hasCompoundNodes();
+
+  for( let i = 0; i < eles.length; i++ ){
+    let ele = eles[i];
+
+    if( includeSelf ){
+      q.push( ele );
+    } else if( hasCompounds ){
+      recursiveStep( q, did, ele );
+    }
+  }
+
+  while( q.length > 0 ){
+    let ele = q.shift();
+
+    fn( ele );
+
+    did.add( ele.id() );
+
+    if( hasCompounds ){
+      recursiveStep( q, did, ele );
+    }
+  }
+
+  return eles;
+}
+
+function addChildren( q, did, ele ){
+  if( ele.isParent() ){
+    let children = ele._private.children;
+
+    for( let i = 0; i < children.length; i++ ){
+      let child = children[i];
+
+      if( !did.has( child.id() ) ){
+        q.push( child );
+      }
+    }
+  }
+}
+
+// very efficient version of eles.add( eles.descendants() ).forEach()
+// for internal use
+elesfn.forEachDown = function( fn, includeSelf = true ){
+  return forEachCompound( this, fn, includeSelf, addChildren );
+};
+
+function addParent( q, did, ele ){
+  if( ele.isChild() ){
+    let parent = ele._private.parent;
+
+    if( !did.has( parent.id() ) ){
+      q.push( parent );
+    }
+  }
+}
+
+elesfn.forEachUp = function( fn, includeSelf = true ){
+  return forEachCompound( this, fn, includeSelf, addParent );
+};
+
+function addParentAndChildren( q, did, ele ){
+  addParent( q, did, ele );
+  addChildren( q, did, ele );
+}
+
+elesfn.forEachUpAndDown = function( fn, includeSelf = true ){
+  return forEachCompound( this, fn, includeSelf, addParentAndChildren );
+};
 
 // aliases
 elesfn.ancestors = elesfn.parents;

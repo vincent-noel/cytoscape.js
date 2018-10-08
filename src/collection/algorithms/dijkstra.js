@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require( '../../is' );
 var Heap = require( '../../heap' );
 
@@ -74,8 +72,8 @@ var elesfn = ({
 
       knownDist[ uid ] = smalletsDist;
 
-      if( smalletsDist === Math.Infinite ){
-        break;
+      if( smalletsDist === Infinity ){
+        continue;
       }
 
       var neighbors = u.neighborhood().intersect( nodes );

@@ -13,6 +13,7 @@ var config;
 var configFile = './docmaker.json';
 var demoFile = './js/load.js';
 var mdRend = new marked.Renderer();
+var path = require('path');
 
 var rendCode = mdRend.code;
 mdRend.code = function(code, lang){
@@ -26,7 +27,7 @@ mdRend.code = function(code, lang){
 };
 
 try {
-  jsonlint.parse( fs.readFileSync(configFile, 'utf8') ); // validate first for convenience
+  jsonlint.parse( fs.readFileSync( path.join(__dirname, configFile), 'utf8') ); // validate first for convenience
   config = require( configFile );
 } catch(e){
   console.error('\n`' + configFile + '` could not be read; check the JSON is formatted correctly via jsonlint');
@@ -35,7 +36,7 @@ try {
 
 // load the demo file
 try {
-  config.demojs = fs.readFileSync(demoFile, 'utf8');
+  config.demojs = fs.readFileSync( path.join(__dirname, demoFile), 'utf8');
 
   config.demojs = config.demojs.match(/\/\/\<demo\>\s*((?:\s|.)+?)\s*\/\/\<\/demo\>/)[1];
 
@@ -62,7 +63,7 @@ function md2html( file ){
 
   var md;
   try{
-    md = fs.readFileSync('./md/' + file, 'utf8');
+    md = fs.readFileSync( path.join(__dirname, './md', file) , 'utf8');
   } catch(e){
     throw 'A markdown file named `' + file + '` was referenced but could not be read';
   }
@@ -206,7 +207,7 @@ function compileConfig( config ){
       var layout = section.layout;
 
       section.name = layout.name;
-      layout.code = fs.readFileSync( '../src/extensions/layout/' + layout.name + '.js', 'utf8' );
+      layout.code = fs.readFileSync( path.join(__dirname, '../src/extensions/layout/' + layout.name + '.js'), 'utf8' );
 
       try {
         layout.options = layout.code.match(/defaults\s*\=\s*(\{(?:.|\s)+?\}\;)/)[1];
@@ -330,15 +331,15 @@ function compileConfig( config ){
   }
 }
 
-module.exports = function( next ){
+function writeDocs(){
   compileConfig( config );
 
-  var htmlTemplate = fs.readFileSync('./template.html', encoding);
+  var htmlTemplate = fs.readFileSync( path.join(__dirname, './template.html'), encoding);
   var template = Handlebars.compile( htmlTemplate );
   var context = config;
   var html = template( context );
 
-  fs.writeFileSync('index.html', html, encoding);
-
-  next && next();
+  fs.writeFileSync( path.join(__dirname, 'index.html'), html, encoding);
 };
+
+writeDocs();

@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require( '../../../is' );
 var C2S = require('canvas2svg');
 

@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var cytoscape = require('../src', cytoscape);
+var cytoscape = require('../src/test.js', cytoscape);
 
 describe('Collection graph manipulation', function(){
 
@@ -49,6 +49,31 @@ describe('Collection graph manipulation', function(){
       cy.$('#n1').remove();
 
       expect( cy.$('#n1n2') ).to.have.length(0);
+    });
+
+    it('should not emit the remove event on an already removed element', function(){
+      var n1 = cy.$('#n1');
+      var emitted = false;
+
+      n1.remove();
+
+      n1.on('remove', function(){ emitted = true; });
+
+      n1.remove();
+
+      expect(emitted).to.be.false;
+    });
+
+    it('should only emit the remove event once', function(){
+      var n1 = cy.$('#n1');
+      var emits = 0;
+
+      n1.on('remove', function(){ emits++; });
+
+      n1.remove();
+      n1.remove();
+
+      expect(emits).to.equal(1);
     });
 
   });
