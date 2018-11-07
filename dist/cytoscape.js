@@ -2750,8 +2750,6 @@ function getShape(render, node) {
 caller.draw = function (context, node, imgObj, render) {
   var shape = getShape(render, node);
 
-  console.log('draw is called');
-
   if (sbgn.sbgnShapes[render.getNodeShape(node)]) {
     shape.draw(context, node, imgObj);
   } else {
@@ -11656,7 +11654,6 @@ var boundingBoxImpl = function boundingBoxImpl(ele, options) {
       var stateAndInfos = ele._private.data.statesandinfos;
       var minY, maxY, minX, maxX;
 
-      console.log('updating borders');
       for (var i = 0; stateAndInfos && i < stateAndInfos.length; i++) {
         var state = stateAndInfos[i];
         if (!state.isDisplayed) {
@@ -28895,7 +28892,6 @@ CRp.drawNode = function (context, node, shiftToOriginWithBb, drawLabel) {
     drawPie(darkness !== 0 || borderWidth !== 0);
     darken(effGhostOpacity);
     setupBorderColor(ghostOpacity * borderOpacity);
-    // drawBorder();
 
     context.translate(-gx, -gy);
   }
@@ -28907,7 +28903,6 @@ CRp.drawNode = function (context, node, shiftToOriginWithBb, drawLabel) {
   drawPie(darkness !== 0 || borderWidth !== 0);
   darken();
   setupBorderColor();
-  // drawBorder();
 
   if (usePaths) {
     context.translate(-pos.x, -pos.y);
@@ -31275,7 +31270,7 @@ module.exports = Stylesheet;
 "use strict";
 
 
-module.exports = "snapshot-e1cb2ff2e9-1535650913711";
+module.exports = "snapshot-92dc371b43-1541575684487";
 
 /***/ })
 /******/ ]);
