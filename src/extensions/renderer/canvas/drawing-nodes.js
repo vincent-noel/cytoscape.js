@@ -266,22 +266,22 @@ CRp.drawNode = function( context, node, shiftToOriginWithBb, drawLabel ){
 
     setupShapeColor( ghostOpacity * bgOpacity );
     drawShape();
+    setupBorderColor( ghostOpacity * borderOpacity );
     drawBorder();
     drawImages( effGhostOpacity );
     drawPie( darkness !== 0 || borderWidth !== 0 );
     darken( effGhostOpacity );
-    setupBorderColor( ghostOpacity * borderOpacity );
 
     context.translate( -gx, -gy );
   }
 
   setupShapeColor();
   drawShape();
+  setupBorderColor();
   drawBorder();
   drawImages();
   drawPie( darkness !== 0 || borderWidth !== 0 );
   darken();
-  setupBorderColor();
 
   if( usePaths ){
     context.translate( -pos.x, -pos.y );

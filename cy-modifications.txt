@@ -144,8 +144,10 @@ See: https://github.com/iVis-at-Bilkent/cytoscape.js/commit/5d7654e82edfe3f9c78f
 Related issue: https://github.com/iVis-at-Bilkent/newt/issues/147
 
 Note that changes happened in Cytoscape.js after this commit.
-Replace drawNode() in src/extensions/renderer/canvas/drawing-nodes.js
-instead of the code segment followed by '// border' comment.
+In src/extensions/renderer/canvas/drawing-nodes.js
+make setupBorderColor() and drawBorder() calls right after drawShape() call
+(looks like this change is done for fixing a bug in exporting the graph as svg).
+
 Also use 'ahmetcandiroglu/canvas2svg' instead of 'kinimesi/canvas2svg#master'.
 
 Note: In sbgnviz renderer drawBorder() function of extensions/renderer/canvas/drawing-nodes.js
