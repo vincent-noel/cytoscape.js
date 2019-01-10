@@ -28887,22 +28887,22 @@ CRp.drawNode = function (context, node, shiftToOriginWithBb, drawLabel) {
 
     setupShapeColor(ghostOpacity * bgOpacity);
     drawShape();
+    setupBorderColor(ghostOpacity * borderOpacity);
     drawBorder();
     drawImages(effGhostOpacity);
     drawPie(darkness !== 0 || borderWidth !== 0);
     darken(effGhostOpacity);
-    setupBorderColor(ghostOpacity * borderOpacity);
 
     context.translate(-gx, -gy);
   }
 
   setupShapeColor();
   drawShape();
+  setupBorderColor();
   drawBorder();
   drawImages();
   drawPie(darkness !== 0 || borderWidth !== 0);
   darken();
-  setupBorderColor();
 
   if (usePaths) {
     context.translate(-pos.x, -pos.y);
@@ -31270,7 +31270,7 @@ module.exports = Stylesheet;
 "use strict";
 
 
-module.exports = "snapshot-92dc371b43-1541575684487";
+module.exports = "snapshot-cdd43d002d-1544774551224";
 
 /***/ })
 /******/ ]);
