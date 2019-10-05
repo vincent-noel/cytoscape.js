@@ -1,6 +1,6 @@
 {
   "name": "cytoscape",
-  "version": "3.1.1",
+  "version": "3.2.16",
   "license": "MIT",
   "description": "Graph theory (a.k.a. network) library for analysis and visualisation",
   "homepage": "http://js.cytoscape.org",
@@ -17,6 +17,11 @@
     "url": "http://maxfranz.com"
   },
   "contributors": [
+    {
+      "name": "Max Franz",
+      "email": "maxkfranz@gmail.com",
+      "url": "http://maxfranz.com"
+    },
     {
       "name": "Christian Lopes",
       "email": "chrtannus@gmail.com"
@@ -61,30 +66,43 @@
   "engines": {
     "node": ">=0.10"
   },
-  "main": "src/index.js",
+  "main": "dist/cytoscape.cjs.js",
   "scripts": {
     "build": "gulp build",
+    "build-cjs": "gulp build-cjs",
+    "build-min": "gulp build-min",
+    "build-unmin": "gulp build-unmin",
+    "copyright": "update license",
     "dist": "gulp dist",
     "watch": "gulp watch",
-    "test": "gulp test && gulp test-browserify",
+    "watch-babel": "gulp watch-babel",
+    "test": "gulp test",
+    "test-build": "gulp test-build",
+    "test-travis": "gulp build-cjs && gulp test-build",
     "sniper": "sniper .",
     "docs": "gulp docs",
-    "docspub": "gulp docspub"
-  },
-  "dependencies": {
-    "canvas2svg": "ahmetcandiroglu/canvas2svg"
+    "docs-min": "gulp docs-min",
+    "docs-pub": "gulp docs-pub",
+    "docs-push": "gulp docs-push",
+    "docs-push-unstable": "gulp docs-push-unstable",
+    "zip": "gulp zip",
+    "lint": "gulp lint",
+    "benchmark": "gulp benchmark",
+    "benchmark-single": "gulp benchmark-single"
   },
   "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.2",
     "benchmark": "^1.0.0",
-    "bluebird": "^2.0.2",
-    "browserify": "^13.0.0",
+    "bluebird": "^3.5.0",
     "chai": "^1.9.0",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-benchmark": "^1.1.1",
     "gulp-concat": "^2.6.0",
     "gulp-cssmin": "^0.1.4",
-    "gulp-derequire": "^2.1.0",
+    "gulp-download": "0.0.1",
     "gulp-eslint": "^3.0.1",
     "gulp-htmlmin": "^1.3.0",
     "gulp-inject": "^4.0.0",
@@ -94,24 +112,24 @@
     "gulp-prompt": "^0.2.0",
     "gulp-replace": "^0.5.4",
     "gulp-shell": "^0.5.2",
-    "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.3",
     "gulp-unzip": "^0.1.3",
     "gulp-util": "^3.0.7",
     "gulp-zip": "^3.2.0",
     "handlebars": "^4.0.5",
     "highlight.js": "^9.3.0",
-    "jscs": "^2.11.0",
     "jsonlint": "^1.6.2",
     "marked": "^0.3.5",
     "mocha": "^2.3.2",
     "node-notifier": "^4.5.0",
+    "object-assign": "^4.1.1",
+    "require-uncached": "^1.0.3",
     "run-sequence": "^1.1.5",
     "sniper": "^0.2.17",
-    "vinyl-buffer": "^1.0.0",
+    "update": "^0.7.4",
+    "updater-license": "^1.0.0",
     "vinyl-paths": "^2.1.0",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.7.0"
+    "webpack": "^3.10.0"
   },
   "sniper": {
     "js": [
@@ -119,5 +137,10 @@
       "/build/cytoscape.js"
     ],
     "first": "images"
+  },
+  "dependencies": {
+    "heap": "^0.2.6",
+    "lodash.debounce": "^4.0.8",
+    "canvas2svg": "ahmetcandiroglu/canvas2svg"
   }
 }

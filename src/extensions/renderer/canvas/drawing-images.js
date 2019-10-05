@@ -1,4 +1,4 @@
-'use strict';
+var nodeFcnCaller = require( '../../../node-fcn-caller' );
 var sbgn = require( '../../../sbgn' );
 
 var CRp = {};
@@ -14,7 +14,7 @@ CRp.safeDrawImage = function( context, img, ix, iy, iw, ih, x, y, w, h ){
   context.drawImage( img, ix, iy, iw, ih, x, y, w, h );
 };
 
-CRp.drawInscribedImage = function( context, img, node, index ){
+CRp.drawInscribedImage = function( context, img, node, index, nodeOpacity ){
   var r = this;
   var pos = node.position();
   var nodeX = pos.x;
@@ -31,7 +31,7 @@ CRp.drawInscribedImage = function( context, img, node, index ){
   var rs = node._private.rscratch;
   var clip = node.pstyle( 'background-clip' ).value;
   var shouldClip = clip === 'node';
-  var imgOpacity = getIndexedStyle( node, 'background-image-opacity', 'value', index );
+  var imgOpacity = getIndexedStyle( node, 'background-image-opacity', 'value', index ) * nodeOpacity;
 
   var imgW = img.width || img.cachedW;
   var imgH = img.height || img.cachedH;
@@ -115,30 +115,24 @@ CRp.drawInscribedImage = function( context, img, node, index ){
 
       if( rs.pathCache ){
         context.clip( rs.pathCache );
-      } 
-      else {
-        if(sbgn.sbgnShapes[r.getNodeShape(node)]){
-          var imgObj = {
-            img: img,
-            imgW: imgW,
-            imgH: imgH,
-            x: x,
-            y: y,
-            w: w,
-            h: h
-          };
+      } else {
+        var isSbgnShape = sbgn.sbgnShapes[r.getNodeShape(node)];
 
-          r.nodeShapes[r.getNodeShape(node)].draw(
-              context,
-              node,
-              imgObj);
-        }
-        else{
-          r.nodeShapes[ r.getNodeShape( node ) ].draw(
-            context,
-            nodeX, nodeY,
-            nodeTW, nodeTH );
+        var imgObj = isSbgnShape ? {
+          img: img,
+          imgW: imgW,
+          imgH: imgH,
+          x: x,
+          y: y,
+          w: w,
+          h: h
+        } : null;
 
+        nodeFcnCaller.draw(
+          context,
+          node, imgObj, r );
+
+        if ( !isSbgnShape ) {
           context.clip();
         }
       }
@@ -155,10 +149,9 @@ CRp.drawInscribedImage = function( context, img, node, index ){
     var pattern = context.createPattern( img, repeat );
     context.fillStyle = pattern;
 
-    r.nodeShapes[ r.getNodeShape( node ) ].draw(
+    nodeFcnCaller.draw(
         context,
-        nodeX, nodeY,
-        nodeTW, nodeTH );
+        node, null, r);
 
     context.translate( x, y );
     context.fill();

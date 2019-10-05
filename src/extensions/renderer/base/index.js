@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require('../../../is');
 var util = require('../../../util');
 var window = require('../../../window');
@@ -27,7 +25,9 @@ BRp.init = function( options ){
     var className =    '__________cytoscape_container';
     var stylesheetAlreadyExists = document.getElementById( stylesheetId ) != null;
 
-    ctr.className = ( ctr.className || '' ) + ' ' + className;
+    if( ctr.className.indexOf( className ) < 0 ){
+      ctr.className = ( ctr.className || '' ) + ' ' + className;
+    }
 
     if( !stylesheetAlreadyExists ){
       var stylesheet = document.createElement('style');
@@ -106,7 +106,6 @@ BRp.init = function( options ){
   r.registerNodeShapes();
   r.registerArrowShapes();
   r.registerCalculationListeners();
-  r.load();
 };
 
 BRp.notify = function( params ){
@@ -129,6 +128,11 @@ BRp.notify = function( params ){
 
     has[ type ] = true;
   } // for
+
+  if( has['init'] ){
+    r.load();
+    return;
+  }
 
   if( has['destroy'] ){
     r.destroy();

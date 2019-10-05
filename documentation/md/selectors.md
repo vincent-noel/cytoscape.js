@@ -3,8 +3,8 @@
 A selector functions similar to a CSS selector on DOM elements, but selectors in Cytoscape.js instead work on collections of graph elements.  Note that wherever a selector may be specified as the argument to a function, a [`eles.filter()`](#collection/building--filtering/eles.filter)-style filter function may be used in place of the selector.  For example:
 
 ```js
-cy.$('#j').neighborhood(function(){
-  return this.isEdge();
+cy.$('#j').neighborhood(function( ele ){
+  return ele.isEdge();
 });
 ```
 
@@ -35,6 +35,11 @@ Note that metacharacters ( ^ $ \ / ( ) | ? + * [ ] { } , . ) need to be escaped:
 cy.filter('#some\\$funky\\@id');
 ```
 
+Note that metacharacters ( ^ $ \ / ( ) | ? + * [ ] { } , . ) need to be escaped:
+
+```js
+cy.filter('#some\\$funky\\@id');
+```
 
 
 ## Group, class, & ID
@@ -99,6 +104,13 @@ Prepended to an operator so that it is negated (e.g. `[foo !$= 'ar']`, `[foo !>=
 **`[[]]` (metadata brackets)**  
 Use double square brackets in place of square ones to match against metadata instead of data (e.g. `[[degree > 2]]` matches elements of degree greater than 2).  The properties that are supported include `degree`, `indegree`, and `outdegree`.
 
+## Edges
+
+**`->` (directed edge selector)**
+Matches edges for which the source and target subselectors match (e.g. `.src -> .tgt`)
+
+**`<->` (undirected edge selector)**
+Matches edges for which the connected node subselectors match (e.g. `.foo <-> .bar`)
 
 ## Compound nodes
 
@@ -109,7 +121,7 @@ Matches direct children of the parent node (e.g. `node > node`).
 Matches descendants of the parent node (e.g. `node node`).
 
 **`$` (subject selector)**  
-Sets the subject of the selector (e.g. `$node > node` to select the parent nodes instead of the children).
+Sets the subject of the selector (e.g. `$node > node` to select the parent nodes instead of the children).  A subject selector may not be used with an edge selector, because the edge ought to be the subject.
 
 
 ## State

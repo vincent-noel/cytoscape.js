@@ -4,8 +4,6 @@ The canvas renderer was written by Yue Dong.
 Modifications tracked on Github.
 */
 
-'use strict';
-
 var util = require( '../../../util' );
 var is = require( '../../../is' );
 var ElementTextureCache = require('./ele-texture-cache');
@@ -38,16 +36,21 @@ function CanvasRenderer( options ){
     bufferContexts: new Array( CRp.CANVAS_LAYERS ),
   };
 
+  var tapHlOff = '-webkit-tap-highlight-color: rgba(0,0,0,0);';
+
   r.data.canvasContainer = document.createElement( 'div' ); // eslint-disable-line no-undef
   var containerStyle = r.data.canvasContainer.style;
-  r.data.canvasContainer.setAttribute( 'style', '-webkit-tap-highlight-color: rgba(0,0,0,0);' );
+  r.data.canvasContainer.setAttribute( 'style', tapHlOff );
   containerStyle.position = 'relative';
   containerStyle.zIndex = '0';
   containerStyle.overflow = 'hidden';
 
   var container = options.cy.container();
   container.appendChild( r.data.canvasContainer );
-  container.setAttribute( 'style', ( container.getAttribute( 'style' ) || '' ) + '-webkit-tap-highlight-color: rgba(0,0,0,0);' );
+
+  if( (container.getAttribute('style') || '').indexOf(tapHlOff) < 0 ){
+    container.setAttribute( 'style', ( container.getAttribute( 'style' ) || '' ) + tapHlOff );
+  }
 
   for( var i = 0; i < CRp.CANVAS_LAYERS; i++ ){
     var canvas = r.data.canvases[ i ] = document.createElement( 'canvas' );  // eslint-disable-line no-undef
@@ -91,6 +94,25 @@ function CanvasRenderer( options ){
         // then keep cached ele texture
       } else {
         r.data.eleTxrCache.invalidateElement( ele );
+
+        // NB this block of code should not be ported to 3.3 (unstable branch).
+        // - This check is unneccesary in 3.3 as caches will be stored without respect to opacity.
+        // - This fix may result in lowered performance for compound graphs.
+        // - Ref : Opacity of child node is not updated for certain zoom levels after parent opacity is overriden #2078
+        if( ele.isParent() && de['style'] ){
+          var op1 = rs.prevParentOpacity;
+          var op2 = ele.pstyle('opacity').pfValue;
+
+          rs.prevParentOpacity = op2;
+
+          if( op1 !== op2 ){
+            var descs = ele.descendants();
+
+            for( var j = 0; j < descs.length; j++ ){
+              r.data.eleTxrCache.invalidateElement( descs[j] );
+            }
+          }
+        }
       }
     }
 
@@ -128,8 +150,8 @@ CRp.path2dEnabled = function( on ){
 };
 
 CRp.usePaths = function(){
+  // return pathsImpld && this.pathsEnabled;
   return false;
-//  return pathsImpld && this.pathsEnabled;
 };
 
 [

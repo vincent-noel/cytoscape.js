@@ -1,26 +1,94 @@
-'use strict';
+let is = require( '../is' );
 
-var is = require( '../is' );
+function styleCache( key, fn, ele ){
+  var _p = ele._private;
+  var cache = _p.styleCache = _p.styleCache || {};
+  var val;
 
-var elesfn = ({
+  if( (val = cache[key]) != null ){
+    return val;
+  } else {
+    val = cache[key] = fn( ele );
+
+    return val;
+  }
+}
+
+function cacheStyleFunction( key, fn ){
+  return function cachedStyleFunction( ele ){
+    return styleCache( key, fn, ele );
+  };
+}
+
+function cachePrototypeStyleFunction( key, fn ){
+  let selfFn = ele => fn.call( ele );
+
+  return function cachedPrototypeStyleFunction(){
+    var ele = this[0];
+
+    if( ele ){
+      return styleCache( key, selfFn, ele );
+    }
+  };
+}
+
+let elesfn = ({
+
+  recalculateRenderedStyle: function( useCache ){
+    let cy = this.cy();
+    let renderer = cy.renderer();
+    let styleEnabled = cy.styleEnabled();
+
+    if( renderer && styleEnabled ){
+      renderer.recalculateRenderedStyle( this, useCache );
+    }
+
+    return this;
+  },
+
+  dirtyStyleCache: function(){
+    let cy = this.cy();
+    let dirty = ele => ele._private.styleCache = {};
+
+    if( cy.hasCompoundNodes() ){
+      let eles;
+
+      eles = this.spawnSelf()
+        .merge( this.descendants() )
+        .merge( this.parents() )
+      ;
+
+      eles.merge( eles.connectedEdges() );
+
+      eles.forEach( dirty );
+    } else {
+      this.forEach( ele => {
+        dirty( ele );
+
+        ele.connectedEdges().forEach( dirty );
+      } );
+    }
+
+    return this;
+  },
 
   // fully updates (recalculates) the style for the elements
   updateStyle: function( notifyRenderer ){
-    var cy = this._private.cy;
+    let cy = this._private.cy;
 
     if( !cy.styleEnabled() ){ return this; }
 
     if( cy._private.batchingStyle ){
-      var bEles = cy._private.batchStyleEles;
+      let bEles = cy._private.batchStyleEles;
 
       bEles.merge( this );
 
       return this; // chaining and exit early when batching
     }
 
-    var hasCompounds = cy.hasCompoundNodes();
-    var style = cy.style();
-    var updatedEles = this;
+    let hasCompounds = cy.hasCompoundNodes();
+    let style = cy.style();
+    let updatedEles = this;
 
     notifyRenderer = notifyRenderer || notifyRenderer === undefined ? true : false;
 
@@ -28,14 +96,15 @@ var elesfn = ({
       updatedEles = this.spawnSelf().merge( this.descendants() ).merge( this.parents() );
     }
 
-    var changedEles = style.apply( updatedEles );
+    let changedEles = style.apply( updatedEles );
 
+    changedEles.dirtyStyleCache();
     changedEles.dirtyCompoundBoundsCache();
 
     if( notifyRenderer ){
-      changedEles.rtrigger( 'style' ); // let renderer know we changed style
+      changedEles.emitAndNotify( 'style' ); // let renderer know we changed style
     } else {
-      changedEles.trigger( 'style' ); // just fire the event
+      changedEles.emit( 'style' ); // just fire the event
     }
 
     return this; // chaining
@@ -43,28 +112,29 @@ var elesfn = ({
 
   // just update the mappers in the elements' styles; cheaper than eles.updateStyle()
   updateMappers: function( notifyRenderer ){
-    var cy = this._private.cy;
-    var style = cy.style();
+    let cy = this._private.cy;
+    let style = cy.style();
     notifyRenderer = notifyRenderer || notifyRenderer === undefined ? true : false;
 
     if( !cy.styleEnabled() ){ return this; }
 
-    var changedEles = style.updateMappers( this );
+    let changedEles = style.updateMappers( this );
 
+    changedEles.dirtyStyleCache();
     changedEles.dirtyCompoundBoundsCache();
 
     if( notifyRenderer ){
-      changedEles.rtrigger( 'style' ); // let renderer know we changed style
+      changedEles.emitAndNotify( 'style' ); // let renderer know we changed style
     } else {
-      changedEles.trigger( 'style' ); // just fire the event
+      changedEles.emit( 'style' ); // just fire the event
     }
     return this; // chaining
   },
 
   // get the internal parsed style object for the specified property
   parsedStyle: function( property ){
-    var ele = this[0];
-    var cy = ele.cy();
+    let ele = this[0];
+    let cy = ele.cy();
 
     if( !cy.styleEnabled() ){ return; }
 
@@ -74,19 +144,19 @@ var elesfn = ({
   },
 
   numericStyle: function( property ){
-    var ele = this[0];
+    let ele = this[0];
 
     if( !ele.cy().styleEnabled() ){ return; }
 
     if( ele ){
-      var pstyle = ele.pstyle( property );
+      let pstyle = ele.pstyle( property );
 
       return pstyle.pfValue !== undefined ? pstyle.pfValue : pstyle.value;
     }
   },
 
   numericStyleUnits: function( property ){
-    var ele = this[0];
+    let ele = this[0];
 
     if( !ele.cy().styleEnabled() ){ return; }
 
@@ -98,10 +168,10 @@ var elesfn = ({
   // get the specified css property as a rendered value (i.e. on-screen value)
   // or get the whole rendered style if no property specified (NB doesn't allow setting)
   renderedStyle: function( property ){
-    var cy = this.cy();
+    let cy = this.cy();
     if( !cy.styleEnabled() ){ return this; }
 
-    var ele = this[0];
+    let ele = this[0];
 
     if( ele ){
       return cy.style().getRenderedStyle( ele, property );
@@ -110,25 +180,26 @@ var elesfn = ({
 
   // read the calculated css style of the element or override the style (via a bypass)
   style: function( name, value ){
-    var cy = this.cy();
+    let cy = this.cy();
 
     if( !cy.styleEnabled() ){ return this; }
 
-    var updateTransitions = false;
-    var style = cy.style();
+    let updateTransitions = false;
+    let style = cy.style();
 
     if( is.plainObject( name ) ){ // then extend the bypass
-      var props = name;
+      let props = name;
       style.applyBypass( this, props, updateTransitions );
 
+      this.dirtyStyleCache();
       this.dirtyCompoundBoundsCache();
 
-      this.rtrigger( 'style' ); // let the renderer know we've updated style
+      this.emitAndNotify( 'style' ); // let the renderer know we've updated style
 
     } else if( is.string( name ) ){
 
       if( value === undefined ){ // then get the property from the style
-        var ele = this[0];
+        let ele = this[0];
 
         if( ele ){
           return style.getStylePropertyValue( ele, name );
@@ -139,13 +210,14 @@ var elesfn = ({
       } else { // then set the bypass with the property value
         style.applyBypass( this, name, value, updateTransitions );
 
+        this.dirtyStyleCache();
         this.dirtyCompoundBoundsCache();
 
-        this.rtrigger( 'style' ); // let the renderer know we've updated style
+        this.emitAndNotify( 'style' ); // let the renderer know we've updated style
       }
 
     } else if( name === undefined ){
-      var ele = this[0];
+      let ele = this[0];
 
       if( ele ){
         return style.getRawStyle( ele );
@@ -158,33 +230,34 @@ var elesfn = ({
   },
 
   removeStyle: function( names ){
-    var cy = this.cy();
+    let cy = this.cy();
 
     if( !cy.styleEnabled() ){ return this; }
 
-    var updateTransitions = false;
-    var style = cy.style();
-    var eles = this;
+    let updateTransitions = false;
+    let style = cy.style();
+    let eles = this;
 
     if( names === undefined ){
-      for( var i = 0; i < eles.length; i++ ){
-        var ele = eles[ i ];
+      for( let i = 0; i < eles.length; i++ ){
+        let ele = eles[ i ];
 
         style.removeAllBypasses( ele, updateTransitions );
       }
     } else {
       names = names.split( /\s+/ );
 
-      for( var i = 0; i < eles.length; i++ ){
-        var ele = eles[ i ];
+      for( let i = 0; i < eles.length; i++ ){
+        let ele = eles[ i ];
 
         style.removeBypasses( ele, names, updateTransitions );
       }
     }
 
+    this.dirtyStyleCache();
     this.dirtyCompoundBoundsCache();
 
-    this.rtrigger( 'style' ); // let the renderer know we've updated style
+    this.emitAndNotify( 'style' ); // let the renderer know we've updated style
 
     return this; // chaining
   },
@@ -200,24 +273,24 @@ var elesfn = ({
   },
 
   effectiveOpacity: function(){
-    var cy = this.cy();
+    let cy = this.cy();
     if( !cy.styleEnabled() ){ return 1; }
 
-    var hasCompoundNodes = cy.hasCompoundNodes();
-    var ele = this[0];
+    let hasCompoundNodes = cy.hasCompoundNodes();
+    let ele = this[0];
 
     if( ele ){
-      var _p = ele._private;
-      var parentOpacity = ele.pstyle( 'opacity' ).value;
+      let _p = ele._private;
+      let parentOpacity = ele.pstyle( 'opacity' ).value;
 
       if( !hasCompoundNodes ){ return parentOpacity; }
 
-      var parents = !_p.data.parent ? null : ele.parents();
+      let parents = !_p.data.parent ? null : ele.parents();
 
       if( parents ){
-        for( var i = 0; i < parents.length; i++ ){
-          var parent = parents[ i ];
-          var opacity = parent.pstyle( 'opacity' ).value;
+        for( let i = 0; i < parents.length; i++ ){
+          let parent = parents[ i ];
+          let opacity = parent.pstyle( 'opacity' ).value;
 
           parentOpacity = opacity * parentOpacity;
         }
@@ -228,11 +301,11 @@ var elesfn = ({
   },
 
   transparent: function(){
-    var cy = this.cy();
+    let cy = this.cy();
     if( !cy.styleEnabled() ){ return false; }
 
-    var ele = this[0];
-    var hasCompoundNodes = ele.cy().hasCompoundNodes();
+    let ele = this[0];
+    let hasCompoundNodes = ele.cy().hasCompoundNodes();
 
     if( ele ){
       if( !hasCompoundNodes ){
@@ -244,10 +317,10 @@ var elesfn = ({
   },
 
   backgrounding: function(){
-    var cy = this.cy();
+    let cy = this.cy();
     if( !cy.styleEnabled() ){ return false; }
 
-    var ele = this[0];
+    let ele = this[0];
 
     return ele._private.backgrounding ? true : false;
   }
@@ -255,11 +328,11 @@ var elesfn = ({
 });
 
 function checkCompound( ele, parentOk ){
-  var _p = ele._private;
-  var parents = _p.data.parent ? ele.parents() : null;
+  let _p = ele._private;
+  let parents = _p.data.parent ? ele.parents() : null;
 
-  if( parents ){ for( var i = 0; i < parents.length; i++ ){
-    var parent = parents[ i ];
+  if( parents ){ for( let i = 0; i < parents.length; i++ ){
+    let parent = parents[ i ];
 
     if( !parentOk( parent ) ){ return false; }
   } }
@@ -268,92 +341,93 @@ function checkCompound( ele, parentOk ){
 }
 
 function defineDerivedStateFunction( specs ){
-  var ok = specs.ok;
-  var edgeOkViaNode = specs.edgeOkViaNode || specs.ok;
-  var parentOk = specs.parentOk || specs.ok;
+  let ok = specs.ok;
+  let edgeOkViaNode = specs.edgeOkViaNode || specs.ok;
+  let parentOk = specs.parentOk || specs.ok;
 
   return function(){
-    var cy = this.cy();
+    let cy = this.cy();
     if( !cy.styleEnabled() ){ return true; }
 
-    var ele = this[0];
-    var _p = ele._private;
-    var hasCompoundNodes = cy.hasCompoundNodes();
+    let ele = this[0];
+    let hasCompoundNodes = cy.hasCompoundNodes();
 
     if( ele ){
+      let _p = ele._private;
+
       if( !ok( ele ) ){ return false; }
 
       if( ele.isNode() ){
         return !hasCompoundNodes || checkCompound( ele, parentOk );
       } else {
-        var src = _p.source;
-        var tgt = _p.target;
+        let src = _p.source;
+        let tgt = _p.target;
 
         return ( edgeOkViaNode(src) && (!hasCompoundNodes || checkCompound(src, edgeOkViaNode)) ) &&
-          ( _p.source === _p.target || ( edgeOkViaNode(tgt) && (!hasCompoundNodes || checkCompound(tgt, edgeOkViaNode)) ) );
+          ( src === tgt || ( edgeOkViaNode(tgt) && (!hasCompoundNodes || checkCompound(tgt, edgeOkViaNode)) ) );
       }
     }
-  }
+  };
 }
 
-var eleTakesUpSpace = function( ele ){
+let eleTakesUpSpace = cacheStyleFunction( 'eleTakesUpSpace', function( ele ){
   return (
     ele.pstyle( 'display' ).value === 'element'
     && ele.width() !== 0
     && ( ele.isNode() ? ele.height() !== 0 : true )
   );
-};
+} );
 
-elesfn.takesUpSpace = defineDerivedStateFunction({
+elesfn.takesUpSpace = cachePrototypeStyleFunction( 'takesUpSpace', defineDerivedStateFunction({
   ok: eleTakesUpSpace
-});
+}) );
 
-var eleInteractive = function( ele ){
+let eleInteractive = cacheStyleFunction( 'eleInteractive', function( ele ){
   return (
     ele.pstyle('events').value === 'yes'
     && ele.pstyle('visibility').value === 'visible'
     && eleTakesUpSpace( ele )
   );
-};
+} );
 
-var parentInteractive = function( parent ){
+let parentInteractive = cacheStyleFunction( 'parentInteractive', function( parent ){
   return (
     parent.pstyle('visibility').value === 'visible'
     && eleTakesUpSpace( parent )
   );
-};
+} );
 
-elesfn.interactive = defineDerivedStateFunction({
+elesfn.interactive = cachePrototypeStyleFunction( 'interactive', defineDerivedStateFunction({
   ok: eleInteractive,
   parentOk: parentInteractive,
   edgeOkViaNode: eleTakesUpSpace
-});
+}) );
 
 elesfn.noninteractive = function(){
-  var ele = this[0];
+  let ele = this[0];
 
   if( ele ){
     return !ele.interactive();
   }
 };
 
-var eleVisible = function( ele ){
+let eleVisible = cacheStyleFunction( 'eleVisible', function( ele ){
   return (
     ele.pstyle( 'visibility' ).value === 'visible'
     && ele.pstyle( 'opacity' ).pfValue !== 0
     && eleTakesUpSpace( ele )
   );
-};
+} );
 
-var edgeVisibleViaNode = eleTakesUpSpace;
+let edgeVisibleViaNode = eleTakesUpSpace;
 
-elesfn.visible = defineDerivedStateFunction({
+elesfn.visible = cachePrototypeStyleFunction( 'visible', defineDerivedStateFunction({
   ok: eleVisible,
   edgeOkViaNode: edgeVisibleViaNode
-});
+}) );
 
 elesfn.hidden = function(){
-  var ele = this[0];
+  let ele = this[0];
 
   if( ele ){
     return !ele.visible();

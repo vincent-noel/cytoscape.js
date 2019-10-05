@@ -148,7 +148,25 @@ Shape:
 
  * **`width`** : The width of the node's body.  This property can take on the special value `label` so the width is automatically based on the node's label.
  * **`height`** : The height of the node's body.  This property can take on the special value `label` so the height is automatically based on the node's label.
- * **`shape`** : The shape of the node's body; may be `rectangle`, `roundrectangle`, `cutrectangle`, `ellipse`, `triangle`, `pentagon`, `hexagon`, `heptagon`, `octagon`, `star`, `diamond`, `vee`, `rhomboid`, or `polygon` (custom polygon specified via `shape-polygon-points`).  Note that each shape fits within the specified `width` and `height`, and so you may have to adjust `width` and `height` if you desire an equilateral shape (i.e. `width !== height` for several equilateral shapes).
+ * **`shape`** : The shape of the node's body.  Note that each shape fits within the specified `width` and `height`, and so you may have to adjust `width` and `height` if you desire an equilateral shape (i.e. `width !== height` for several equilateral shapes).  Only `*rectangle` shapes are supported by compounds, because the dimensions of a compound are defined by the bounding box of the children.  The following values are accepted:
+    * `ellipse`
+    * `triangle`
+    * `rectangle`
+    * `roundrectangle`
+    * `bottomroundrectangle`
+    * `cutrectangle`
+    * `barrel`
+    * `rhomboid`
+    * `diamond`
+    * `pentagon`
+    * `hexagon`
+    * `concavehexagon`
+    * `heptagon`
+    * `octagon`
+    * `star`
+    * `tag`
+    * `vee`
+    * `polygon` (custom polygon specified via `shape-polygon-points`).
  * **`shape-polygon-points`** : A space-separated list of numbers ranging on [-1, 1], representing alternating x and y values (i.e. `x1 y1   x2 y2,   x3 y3 ...`).  This represents the points in the polygon for the node's shape.  The bounding box of the node is given by (-1, -1), (1, -1), (1, 1), (-1, 1).
 
 Background:
@@ -198,6 +216,17 @@ A background image may be applied to a node's body.  The following properties su
   * Can specify multiple background images by separating each image with a space (space delimited format), but if using a non-string stylesheet, then using arrays are preferred.
     * The images will be applied to the node's body in the order given, layering one on top of each other.
     * When specifying properties for multiple images, if the property for a given image is not provided, then the default value is used as fallback.
+  * SVG image considerations
+    * Using the `viewbox` attribute in SVG images may cause render problems in Firefox.
+    * SVG images do not work consistently in Internet Explorer.
+    * Always include this XML header in each SVG image:
+    ```
+    <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg>
+    ```
+    * Use [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to load SVG data.
+    ```
+    var data = 'data:image/svg+xml;utf8,' + encodeURIComponent(svgFile);
+    ```
  * ** `background-image-crossorigin`**: All images are loaded with a [`crossorigin`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-crossorigin) attribute which may be `anonymous` or `use-credentials`. The default is set to `anonymous`.
  * **`background-image-opacity`** : The opacity of the background image.
  * **`background-width`** : Specifies the width of the image.  A percent value (e.g. `50%`) may be used to set the image width relative to the node width.  If used in combination with `background-fit`, then this value overrides the width of the image in calculating the fitting --- thereby overriding the aspect ratio.  The `auto` value is used by default, which uses the width of the image.
@@ -299,10 +328,20 @@ For edges made of several straight lines (`curve-style: segments`):
 
 ## Edge arrow
 
- * **`<pos>-arrow-color`** : The colour of the edge's source arrow.
- * **`<pos>-arrow-shape`** : The shape of the edge's source arrow; may be `tee`, `triangle`, `triangle-tee`, `triangle-cross`, `triangle-backcurve`, `square`, `circle`, `diamond`, or `none`.
- * **`<pos>-arrow-fill`** : The fill state of the edge's source arrow; may be `filled` or `hollow`.
- * **`arrow-scale`** : Scaling for the arrow size; may be any number >= 0.
+* **`<pos>-arrow-color`** : The colour of the edge's source arrow.
+* **`<pos>-arrow-shape`** : The shape of the edge's source arrow; may be one of:
+  * `triangle`
+  * `triangle-tee`
+  * `triangle-cross`
+  * `triangle-backcurve`
+  * `vee`
+  * `tee`
+  * `square`
+  * `circle`
+  * `diamond`
+  * `none`
+* **`<pos>-arrow-fill`** : The fill state of the edge's source arrow; may be `filled` or `hollow`.
+* **`arrow-scale`** : Scaling for the arrow size; may be any number >= 0.
 
 For each edge arrow property above, replace `<pos>` with one of
 
@@ -375,12 +414,13 @@ Basic font styling:
  * **`font-size`** : The size of the label text.
  * **`font-style`** : A [CSS font style](https://developer.mozilla.org/en-US/docs/Web/CSS/font-style) to be applied to the label text.
  * **`font-weight`** : A [CSS font weight](https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight) to be applied to the label text.
- * **`text-transform`** : A transformation to apply to the label text; may be `none`, `uppercase`, or `lowercase`.
+ * **`text-transform`** : A transformation to apply to the label text; may be `none`,
+ `uppercase`, or `lowercase`.
 
 Wrapping text:
 
- * **`text-wrap`** : A wrapping style to apply to the label text; may be `none` for no wrapping (including manual newlines: `\n`), `wrap` for manual and/or autowrapping or `ellipsize` to truncate the string and append '...' based on `text-max-width`.
- * **`text-max-width`** : The maximum width for wrapped text, applied when `text-wrap` is set to `wrap` or `ellipsize`.  For only manual newlines (i.e. `\n`), set a very large value like `1000px` such that only your newline characters would apply.
+ * **`text-wrap`** : A wrapping style to apply to the label text; may be `none` for no wrapping (including manual newlines: `\n`), `wrap` for manual and/or autowrapping or `ellipsis` to truncate the string and append '...' based on `text-max-width`.
+ * **`text-max-width`** : The maximum width for wrapped text, applied when `text-wrap` is set to `wrap` or `ellipsis`.  For only manual newlines (i.e. `\n`), set a very large value like `1000px` such that only your newline characters would apply.
 
 Node label alignment:
 
@@ -452,6 +492,15 @@ These properties allow for the creation of overlays on top of nodes or edges, an
  * **`overlay-color`** : The colour of the overlay.
  * **`overlay-padding`** : The area outside of the element within which the overlay is shown.
  * **`overlay-opacity`** : The opacity of the overlay.
+
+## Ghost
+
+The ghost properties allow for creating a ghosting effect, a semitransparent duplicate of the element drawn at an offset.
+
+ * **`ghost`** : Whether to use the ghost effect; may be `yes` or `no`.
+ * **`ghost-offset-x`** : The horizontal offset used to position the ghost effect.
+ * **`ghost-offset-y`** : The vertical offset used to position the ghost effect.
+ * **`ghost-opacity`** : The opacity of the ghost effect.
 
 ## Transition animation
 

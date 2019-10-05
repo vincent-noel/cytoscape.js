@@ -1,5 +1,3 @@
-'use strict';
-
 /*
 The CoSE layout was written by Gerardo Huck.
 https://www.linkedin.com/in/gerardohuck/
@@ -26,11 +24,26 @@ var defaults = {
 
   // Called on `layoutstop`
   stop: function(){},
-
+  
   // Whether to animate while running the layout
+  // true : Animate continuously as the layout is running
+  // false : Just show the end result
+  // 'end' : Animate with the end result, from the initial positions to the end positions
   animate: true,
 
-  // The layout animates only after this many milliseconds
+  // Easing of the animation for animate:'end'
+  animationEasing: undefined,
+
+  // The duration of the animation for animate:'end'
+  animationDuration: undefined,
+
+  // A function that determines whether the node should be animated
+  // All nodes animated by default on animate enabled
+  // Non-animated nodes are positioned immediately when the layout starts
+  animateFilter: function ( node, i ){ return true; },
+
+
+  // The layout animates only after this many milliseconds for animate:true
   // (prevents flashing on fast runs)
   animationThreshold: 250,
 
@@ -54,34 +67,34 @@ var defaults = {
   randomize: false,
 
   // Extra spacing between components in non-compound graphs
-  componentSpacing: 100,
+  componentSpacing: 40,
 
   // Node repulsion (non overlapping) multiplier
-  nodeRepulsion: function( node ){ return 400000; },
+  nodeRepulsion: function( node ){ return 2048; },
 
   // Node repulsion (overlapping) multiplier
-  nodeOverlap: 10,
+  nodeOverlap: 4,
 
   // Ideal edge (non nested) length
-  idealEdgeLength: function( edge ){ return 10; },
+  idealEdgeLength: function( edge ){ return 32; },
 
   // Divisor to compute edge forces
-  edgeElasticity: function( edge ){ return 100; },
+  edgeElasticity: function( edge ){ return 32; },
 
   // Nesting factor (multiplier) to compute ideal edge length for nested edges
-  nestingFactor: 5,
+  nestingFactor: 1.2,
 
   // Gravity force (constant)
-  gravity: 80,
+  gravity: 1,
 
   // Maximum number of iterations to perform
   numIter: 1000,
 
   // Initial temperature (maximum node displacement)
-  initialTemp: 200,
+  initialTemp: 1000,
 
   // Cooling factor (how the temperature is reduced between consecutive iterations
-  coolingFactor: 0.95,
+  coolingFactor: 0.99,
 
   // Lower temperature threshold (below this point the layout will end)
   minTemp: 1.0,
@@ -144,7 +157,10 @@ CoseLayout.prototype.run = function(){
     },
     stop: function(){
       return this;
-    }
+    },
+    stopped: function(){
+      return true;
+    },
   };
 
   function broadcast( message ){ // for false thread
@@ -159,7 +175,9 @@ CoseLayout.prototype.run = function(){
 
   layout.stopped = false;
 
-  layout.trigger( { type: 'layoutstart', layout: layout } );
+  if( options.animate === true || options.animate === false ){
+    layout.emit( { type: 'layoutstart', layout: layout } );
+  }
 
   // Set DEBUG - Global variable
   if( true === options.debug ){
@@ -503,7 +521,7 @@ CoseLayout.prototype.run = function(){
         // If both centers are the same, do nothing.
         // A random force has already been applied as node repulsion
         if( 0 === directionX && 0 === directionY ){
-          return;
+          continue;
         }
 
         // Get clipping points for both nodes
@@ -908,7 +926,7 @@ CoseLayout.prototype.run = function(){
         i++;
       }
 
-      if( options.animate ){
+      if( options.animate === true ){
         broadcast( layoutInfo.layoutNodes ); // eslint-disable-line no-undef
       }
 
@@ -925,14 +943,22 @@ CoseLayout.prototype.run = function(){
   } );
 
   var done = function(){
-    refresh({
-      force: true,
-      next: function(){
-        // Layout has finished
-        layout.one('layoutstop', options.stop);
-        layout.trigger({ type: 'layoutstop', layout: layout });
-      }
-    });
+    if( options.animate === true || options.animate === false ){
+      refresh({
+        force: true,
+        next: function(){
+          // Layout has finished
+          layout.one('layoutstop', options.stop);
+          layout.emit({ type: 'layoutstop', layout: layout });
+        }
+      });
+    } else {
+      options.eles.nodes().layoutPositions( layout, options, function( node ){
+        var lnode = layoutInfo.layoutNodes[ layoutInfo.idToIndex[ node.data( 'id' ) ] ];
+
+        return { x: lnode.positionX, y: lnode.positionY };
+      } );
+    }
   };
 
   return this; // chaining
@@ -949,7 +975,7 @@ CoseLayout.prototype.stop = function(){
     this.thread.stop();
   }
 
-  this.trigger( 'layoutstop' );
+  this.emit( 'layoutstop' );
 
   return this; // chaining
 };
@@ -1372,7 +1398,7 @@ var refreshPositions = function( layoutInfo, cy, options ){
     // logDebug(s);
     layoutInfo.ready = true;
     layout.one( 'layoutready', options.ready );
-    layout.trigger( { type: 'layoutready', layout: this } );
+    layout.emit( { type: 'layoutready', layout: this } );
   }
 };
 
