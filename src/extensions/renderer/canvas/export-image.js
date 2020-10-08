@@ -68,7 +68,16 @@ CRp.bufferCanvasImage = function( options ){
   // Rasterize the layers, but only if container has nonzero size
   if( width > 0 && height > 0 ){
 
-    buffCxt.clearRect( 0, 0, width, height );
+    if ( options.svg) {
+      buffCxt.globalCompositeOperation = 'destination-over';
+
+      buffCxt.fillStyle = options.bg;
+      buffCxt.rect( 0, 0, width, height );
+      buffCxt.fill();
+      
+    } else {
+      buffCxt.clearRect( 0, 0, width, height );  
+    }
 
     buffCxt.globalCompositeOperation = 'source-over';
 
@@ -102,7 +111,7 @@ CRp.bufferCanvasImage = function( options ){
     }
 
     // need to fill bg at end like this in order to fill cleared transparent pixels in jpgs
-    if( options.bg ){
+    if( !options.svg && options.bg ){
       buffCxt.globalCompositeOperation = 'destination-over';
 
       buffCxt.fillStyle = options.bg;
